@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Mobile Gallery – Best Phones in Simrahi Bazar, Bihar</title>
+
+<!-- Firebase SDK (v9 compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+
+<!-- Cashfree Payments SDK — opens the secure checkout popup (UPI/GPay/PhonePe/Paytm/Cards) -->
+<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+
+<!-- All styles -->
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     ADMIN LOGIN OVERLAY
+══════════════════════════════════════════ -->
+<div id="adminLoginOverlay">
+  <div class="login-box">
+    <div class="lock">🔐</div>
+    <h2>Admin <span>Login</span></h2>
+    <p>Restricted access – only for store owner</p>
+    <input type="email" id="adminUser" placeholder="Admin Email" autocomplete="off"/>
+    <input type="password" id="adminPass" placeholder="Password"/>
+    <button class="login-submit" onclick="doAdminLogin()">Login →</button>
+    <div class="login-error" id="loginError">❌ Wrong email or password!</div>
+    <button class="login-cancel" onclick="closeAdminLogin()">✕ Cancel</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     ADMIN PANEL
+══════════════════════════════════════════ -->
+<div id="adminPanel">
+  <div class="ap-nav">
+    <div class="ap-logo">⚙️ <span>Admin Panel</span></div>
+    <div class="ap-tabs">
+      <button class="ap-tab active" onclick="apTab('dashboard',this)">📊 Dashboard</button>
+      <button class="ap-tab" onclick="apTab('phones',this)">📱 Phones</button>
+      <button class="ap-tab" onclick="apTab('gadgets',this)">🛍️ Gadgets</button>
+      <button class="ap-tab" onclick="apTab('brands',this)">🏷️ Brands</button>
+      <button class="ap-tab" onclick="apTab('events',this)">🎉 Events</button>
+      <button class="ap-tab" onclick="apTab('gallery',this)">🖼️ Gallery</button>
+      <button class="ap-tab" onclick="apTab('messages',this)">📩 Messages <span id="msgBadge" style="background:var(--red);color:#fff;font-size:.65rem;padding:1px 6px;border-radius:8px;margin-left:4px;display:none;">0</span></button>
+      <button class="ap-tab" onclick="apTab('reviews',this)">⭐ Reviews</button>
+      <button class="ap-tab" onclick="apTab('orders',this)">🧾 Orders <span id="orderBadge" style="background:var(--red);color:#fff;font-size:.65rem;padding:1px 6px;border-radius:8px;margin-left:4px;display:none;">0</span></button>
+      <button class="ap-tab" onclick="apTab('payment',this)">💳 Payment Setup</button>
+      <button class="ap-tab" onclick="apTab('store',this)">🏪 Store Info</button>
+      <button class="ap-tab" onclick="apTab('hero',this)">🏠 Hero</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span id="fbStatus" style="font-size:.72rem;font-weight:700;padding:4px 10px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:8px;color:var(--muted);white-space:nowrap;">💾 Local Only</span>
+      <button class="ap-close-btn" onclick="exitAdmin()">✕ Exit</button>
+    </div>
+  </div>
+
+  <div class="ap-body">
+
+    <!-- DASHBOARD -->
+    <div class="ap-section active" id="aps-dashboard">
+      <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:6px;">Welcome, Admin 👋</h2>
+      <p style="color:var(--muted);font-size:.86rem;margin-bottom:22px;">Manage your entire store from here.</p>
+      <div class="ap-stats" id="apStatsRow"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+        <div class="ap-card">
+          <div class="ap-card-head"><h3>⚡ Quick Actions</h3></div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <button class="ap-btn ap-btn-primary" onclick="apTabClick('phones')">📱 Add New Phone</button>
+            <button class="ap-btn ap-btn-edit" onclick="apTabClick('store')">🏪 Edit Store Info</button>
+            <button class="ap-btn ap-btn-edit" onclick="apTabClick('hero')">🏠 Edit Hero Section</button>
+            <button class="ap-btn ap-btn-edit" onclick="apTabClick('brands')">🏷️ Manage Brands</button>
+          </div>
+        </div>
+        <div class="ap-card">
+          <div class="ap-card-head"><h3>📋 Recent Phones</h3></div>
+          <div id="apRecentPhones"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHONES -->
+    <div class="ap-section" id="aps-phones">
+      <div class="ap-card">
+        <div class="ap-card-head"><h3 id="phoneFormTitle">📱 Add New Phone</h3></div>
+        <div class="fg-grid c3">
+          <div class="fg"><label>Brand *</label>
+            <select id="pf-brand">
+              <option value="">-- Select Brand --</option>
+              <option>Apple</option><option>Samsung</option><option>Vivo</option>
+              <option>Oppo</option><option>Xiaomi</option><option>Realme</option>
+              <option>Tecno</option><option>Infinix</option><option>Nokia</option><option>OnePlus</option>
+            </select>
+          </div>
+          <div class="fg"><label>Phone Name *</label><input type="text" id="pf-name" placeholder="e.g. Galaxy A55"/></div>
+          <div class="fg"><label>Price *</label><input type="text" id="pf-price" placeholder="e.g. ₹25,999"/></div>
+          <div class="fg"><label>Specs / Description</label><input type="text" id="pf-specs" placeholder="e.g. 50MP • 128GB • 5000mAh"/></div>
+          <div class="fg"><label>Badge</label>
+            <select id="pf-badge">
+              <option value="">None</option>
+              <option value="new">NEW</option>
+              <option value="sale">SALE</option>
+              <option value="hot">HOT</option>
+            </select>
+          </div>
+          <div class="fg"><label>Stock Status</label>
+            <select id="pf-stock">
+              <option value="in">✅ In Stock</option>
+              <option value="out">⛔ Out of Stock</option>
+            </select>
+          </div>
+          <div class="fg"><label>Pre-Order Available?</label>
+            <select id="pf-preorder">
+              <option value="">No — Call Shop only</option>
+              <option value="yes">Yes — Allow Pre-Order</option>
+            </select>
+          </div>
+          <div class="fg"><label>Pre-Order Down Payment %</label>
+            <select id="pf-preorder-pct">
+              <option value="10">10%</option>
+              <option value="20">20%</option>
+              <option value="both">Let customer choose (10% or 20%)</option>
+            </select>
+          </div>
+          <div class="fg"><label>Emoji Icon (fallback)</label>
+            <input type="text" id="pf-icon" placeholder="📱" maxlength="2" value="📱"/>
+          </div>
+          <!-- PHOTO UPLOAD — 3 SLOTS -->
+          <div class="fg full">
+            <label>Phone Photos (Upload up to 3 images — 1st photo shows on Home & Listing cards)</label>
+            <div class="multi-photo-grid">
+              <div class="multi-photo-slot">
+                <span class="multi-photo-slot-num">1</span>
+                <div class="photo-upload-area" id="photoUploadArea1">
+                  <input type="file" id="pf-photo1" accept="image/*" onchange="previewPhoto(this,1)"/>
+                  <div class="photo-upload-label">📷 Main Photo<br><span>Cover image</span></div>
+                  <img id="photoPreviewImg1" class="photo-preview" alt="preview"/>
+                </div>
+                <input type="hidden" id="pf-photoData1" value=""/>
+              </div>
+              <div class="multi-photo-slot">
+                <span class="multi-photo-slot-num">2</span>
+                <div class="photo-upload-area" id="photoUploadArea2">
+                  <input type="file" id="pf-photo2" accept="image/*" onchange="previewPhoto(this,2)"/>
+                  <div class="photo-upload-label">📷 Photo 2<br><span>Optional</span></div>
+                  <img id="photoPreviewImg2" class="photo-preview" alt="preview"/>
+                </div>
+                <input type="hidden" id="pf-photoData2" value=""/>
+              </div>
+              <div class="multi-photo-slot">
+                <span class="multi-photo-slot-num">3</span>
+                <div class="photo-upload-area" id="photoUploadArea3">
+                  <input type="file" id="pf-photo3" accept="image/*" onchange="previewPhoto(this,3)"/>
+                  <div class="photo-upload-label">📷 Photo 3<br><span>Optional</span></div>
+                  <img id="photoPreviewImg3" class="photo-preview" alt="preview"/>
+                </div>
+                <input type="hidden" id="pf-photoData3" value=""/>
+              </div>
+            </div>
+          </div>
+        </div>
+        <input type="hidden" id="pf-editId" value=""/>
+        <div class="fg-btns">
+          <button class="ap-btn ap-btn-primary" onclick="savePhone()">💾 Save Phone</button>
+          <button class="ap-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);" onclick="clearPhoneForm()">✕ Clear</button>
+        </div>
+      </div>
+
+      <div class="ap-card">
+        <div class="ap-card-head">
+          <h3>All Phones (<span id="phonesCount">0</span>)</h3>
+          <input type="text" id="phoneSearch" placeholder="🔍 Search…" onkeyup="renderAdminPhones()"
+            style="background:var(--surface);border:1px solid var(--border);color:var(--text);
+            padding:7px 12px;border-radius:8px;font-size:.82rem;outline:none;width:180px;"/>
+        </div>
+        <div style="overflow-x:auto;">
+          <table class="ap-table">
+            <thead><tr><th>Photo</th><th>Brand</th><th>Name</th><th>Price</th><th>Badge</th><th>Actions</th></tr></thead>
+            <tbody id="adminPhonesTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- BRANDS -->
+    <div class="ap-section" id="aps-brands">
+      <div class="ap-card">
+        <div class="ap-card-head"><h3>🏷️ Add / Edit Brand</h3></div>
+        <div class="fg-grid">
+          <div class="fg"><label>Brand Name *</label><input type="text" id="bf-name" placeholder="e.g. Samsung"/></div>
+          <div class="fg"><label>Emoji Icon</label><input type="text" id="bf-icon" placeholder="📗" maxlength="2"/></div>
+          <div class="fg full"><label>Description</label><input type="text" id="bf-desc" placeholder="e.g. Galaxy Series • 30+ Models"/></div>
+        </div>
+        <input type="hidden" id="bf-editId"/>
+        <div class="fg-btns">
+          <button class="ap-btn ap-btn-primary" onclick="saveBrand()">💾 Save Brand</button>
+          <button class="ap-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);" onclick="clearBrandForm()">✕ Clear</button>
+        </div>
+      </div>
+      <div class="ap-card">
+        <div class="ap-card-head"><h3>All Brands (<span id="brandsCount">0</span>)</h3></div>
+        <div style="overflow-x:auto;">
+          <table class="ap-table">
+            <thead><tr><th>Icon</th><th>Name</th><th>Description</th><th>Phones</th><th>Actions</th></tr></thead>
+            <tbody id="adminBrandsTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- GADGETS ADMIN -->
+    <div class="ap-section" id="aps-gadgets">
+      <div class="ap-card">
+        <div class="ap-card-head"><h3 id="gadgetFormTitle">🛍️ Add New Product</h3></div>
+        <div class="fg-grid">
+          <div class="fg"><label>Category *</label>
+            <select id="gd-cat">
+              <option value="">-- Select Category --</option>
+              <option>Smart Watch</option><option>Earbuds</option><option>Earphones</option>
+              <option>Headphones</option><option>Phone Cover</option><option>Tempered Glass</option>
+              <option>Charger</option><option>Cable</option><option>Other</option>
+            </select>
+          </div>
+          <div class="fg"><label>Product Name *</label><input type="text" id="gd-name" placeholder="e.g. TWS Earbuds Pro"/></div>
+          <div class="fg"><label>Price *</label><input type="text" id="gd-price" placeholder="e.g. ₹1,499"/></div>
+          <div class="fg"><label>Icon Emoji (used if no photo uploaded)</label><input type="text" id="gd-icon" placeholder="e.g. 🎧" maxlength="4"/></div>
+          <div class="fg full">
+            <label>Product Photo (optional — overrides emoji icon if uploaded)</label>
+            <div class="photo-upload-area" id="gadgetPhotoUploadArea">
+              <input type="file" id="gd-photo" accept="image/*" onchange="previewGadgetPhoto(this)"/>
+              <div class="photo-upload-label">📷 Click to upload product photo<br><span>JPG, PNG, WEBP supported</span></div>
+              <img id="gadgetPhotoPreviewImg" class="photo-preview" alt="preview"/>
+            </div>
+            <input type="hidden" id="gd-photoData" value=""/>
+          </div>
+          <div class="fg full"><label>Short Description *</label><input type="text" id="gd-desc" placeholder="e.g. Active noise cancellation, 30hr battery, Bluetooth 5.3"/></div>
+          <div class="fg"><label>Badge</label>
+            <select id="gd-badge">
+              <option value="">None</option>
+              <option value="new">NEW</option>
+              <option value="sale">SALE</option>
+              <option value="hot">HOT</option>
+            </select>
+          </div>
+          <div class="fg"><label>Stock Status</label>
+            <select id="gd-stock">
+              <option value="in">✅ In Stock</option>
+              <option value="out">⛔ Out of Stock</option>
+            </select>
+          </div>
+        </div>
+        <input type="hidden" id="gd-editId" value=""/>
+        <div class="fg-btns">
+          <button class="ap-btn ap-btn-primary" onclick="saveGadget()">💾 Save Product</button>
+          <button class="ap-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);" onclick="clearGadgetForm()">✕ Clear</button>
+        </div>
+      </div>
+      <div class="ap-card">
+        <div class="ap-card-head"><h3>All Products (<span id="gadgetCount">0</span>)</h3></div>
+        <table class="ap-table">
+          <thead><tr><th>Category</th><th>Name</th><th>Price</th><th>Badge</th><th>Actions</th></tr></thead>
+          <tbody id="adminGadgetsTable"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EVENTS ADMIN -->
+    <div class="ap-section" id="aps-events">
+      <div class="ap-card">
+        <div class="ap-card-head"><h3 id="eventFormTitle">🎉 Add New Event</h3></div>
+        <div class="fg-grid">
+          <div class="fg"><label>Event Title *</label><input type="text" id="ev-title" placeholder="e.g. Eid Special Sale 2025"/></div>
+          <div class="fg"><label>Badge Label</label><input type="text" id="ev-badge" placeholder="e.g. SALE, NEW, LIVE"/></div>
+          <div class="fg full"><label>Description *</label>
+            <textarea id="ev-desc" placeholder="Describe the event — offers, discounts, dates, details…"
+              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);
+              padding:12px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:.85rem;
+              min-height:80px;resize:vertical;outline:none;"></textarea>
+          </div>
+          <div class="fg"><label>Event Date</label><input type="text" id="ev-date" placeholder="e.g. 20 June 2025"/></div>
+          <div class="fg full">
+            <label>Event Photo</label>
+            <div class="photo-upload-area" id="eventUploadArea">
+              <input type="file" id="ev-photo" accept="image/*" onchange="previewEventPhoto(this)"/>
+              <div class="photo-upload-label">📷 Click to upload event photo<br><span>JPG, PNG, WEBP supported</span></div>
+              <img id="eventPreviewImg" class="photo-preview" alt="preview"/>
+            </div>
+            <input type="hidden" id="ev-photoData" value=""/>
+          </div>
+        </div>
+        <input type="hidden" id="ev-editId" value=""/>
+        <div class="fg-btns">
+          <button class="ap-btn ap-btn-primary" onclick="saveEvent()">💾 Save Event</button>
+          <button class="ap-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);" onclick="clearEventForm()">✕ Clear</button>
+        </div>
+      </div>
+      <div class="ap-card">
+        <div class="ap-card-head"><h3>All Events (<span id="eventCount">0</span>)</h3></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;" id="adminEventsGrid"></div>
+      </div>
+    </div>
+
+    <!-- GALLERY -->
+    <div class="ap-section" id="aps-gallery">
+      <div class="ap-card">
+        <div class="ap-card-head"><h3>🖼️ Add Shop Photo</h3></div>
+        <div class="fg-grid">
+          <div class="fg"><label>Photo Title *</label><input type="text" id="gf-title" placeholder="e.g. Store Front View"/></div>
+          <div class="fg full"><label>Description</label><input type="text" id="gf-desc" placeholder="e.g. Our beautiful shop entrance at Simrahi Bazar"/></div>
+          <div class="fg full">
+            <label>Upload Photo</label>
+            <div class="photo-upload-area" id="galleryUploadArea">
+              <input type="file" id="gf-photo" accept="image/*" onchange="previewGalleryPhoto(this)"/>
+              <div class="photo-upload-label">📷 Click to upload shop photo<br><span>JPG, PNG, WEBP supported</span></div>
+              <img id="galleryPreviewImg" class="photo-preview" alt="preview"/>
+            </div>
+            <input type="hidden" id="gf-photoData" value=""/>
+          </div>
+        </div>
+        <input type="hidden" id="gf-editId" value=""/>
+        <div class="fg-btns">
+          <button class="ap-btn ap-btn-primary" onclick="saveGalleryPhoto()">💾 Save Photo</button>
+          <button class="ap-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);" onclick="clearGalleryForm()">✕ Clear</button>
+        </div>
+      </div>
+      <div class="ap-card">
+        <div class="ap-card-head"><h3>All Gallery Photos (<span id="galleryCount">0</span>)</h3></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:4px 0;" id="adminGalleryGrid"></div>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="ap-section" id="aps-messages">
+      <div class="ap-card">
+        <div class="ap-card-head">
+          <h3>📩 Customer Messages (<span id="msgCount">0</span>)</h3>
+          <button class="ap-btn ap-btn-danger" onclick="clearAllMessages()" style="font-size:.75rem;padding:6px 12px;">🗑️ Clear All</button>
+        </div>
+        <div id="adminMsgList"><p style="color:var(--muted);font-size:.85rem;">No messages yet.</p></div>
+      </div>
+    </div>
+
+    <!-- REVIEWS ADMIN -->
+    <div class="ap-section" id="aps-reviews">
+      <div class="ap-card">
+        <div class="ap-card-head">
+          <h3>⭐ Customer Reviews (<span id="adminReviewCount">0</span>)</h3>
+          <div style="font-size:.82rem;color:var(--muted);">Average: <strong id="adminAvgRating">—</strong></div>
+        </div>
+        <div id="adminReviewList"><p style="color:var(--muted);font-size:.85rem;">No reviews yet.</p></div>
+      </div>
+    </div>
+
+    <!-- PAYMENT SETUP -->
+    <div class="ap-section" id="aps-payment">
+
+      <div class="ap-card" id="masterPaySwitchCard" style="border:1px solid var(--border);">
+        <div class="ap-card-head" style="margin-bottom:6px;">
+          <h3>🔌 Payment System Master Switch</h3>
+        </div>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px;line-height:1.6;">
+          Turn this OFF to immediately stop accepting any new pre-order payments site-wide. Customers will see the Pre-Order button disabled. Orders already in progress are not affected — they will complete normally.
+        </p>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+          <div class="pay-toggle" id="masterPayToggle" onclick="toggleMasterPayment()"></div>
+          <span id="masterPayStatusLabel" style="font-weight:700;font-size:.9rem;">Loading...</span>
+          <button class="ap-btn ap-btn-edit ap-btn-sm" style="margin-left:auto;" onclick="reverifyPendingOrdersNow()">🔄 Re-check Pending Orders Now</button>
+        </div>
+      </div>
+
+      <div class="ap-card">
+        <div class="ap-card-head"><h3>💳 Configure Payment Methods (UPI QR)</h3></div>
+        <p style="font-size:.8rem;color:var(--muted);margin-bottom:18px;line-height:1.6;">
+          Enter your shop's UPI ID for each method you want to accept. A QR code is generated automatically — money goes <strong style="color:var(--text);">directly to your bank account</strong>. No middleman, no fees, 100% safe.
+        </p>
+
+        <div class="pay-method-card">
+          <div class="pay-method-head">
+            <h4>📱 Google Pay</h4>
+            <div class="pay-toggle" id="pm-toggle-gpay" onclick="togglePayMethod('gpay')"></div>
+          </div>
+          <div class="fg"><label>UPI ID (e.g. yourname@okicici)</label><input type="text" id="pm-gpay-upi" placeholder="aftabazmi@okicici"/></div>
+        </div>
+
+        <div class="pay-method-card">
+          <div class="pay-method-head">
+            <h4>💜 PhonePe</h4>
+            <div class="pay-toggle" id="pm-toggle-phonepe" onclick="togglePayMethod('phonepe')"></div>
+          </div>
+          <div class="fg"><label>UPI ID (e.g. yourname@ybl)</label><input type="text" id="pm-phonepe-upi" placeholder="aftabazmi@ybl"/></div>
+        </div>
+
+
+        <div class="pay-method-card">
+          <div class="pay-method-head">
+            <h4>🔵 Paytm</h4>
+            <div class="pay-toggle" id="pm-toggle-paytm" onclick="togglePayMethod('paytm')"></div>
+          </div>
+          <div class="fg"><label>UPI ID (e.g. yourname@paytm)</label><input type="text" id="pm-paytm-upi" placeholder="aftabazmi@paytm"/></div>
+        </div>
+
+        <div class="pay-method-card">
+          <div class="pay-method-head">
+            <h4>🅿️ PayPal</h4>
+            <div class="pay-toggle" id="pm-toggle-paypal" onclick="togglePayMethod('paypal')"></div>
+          </div>
+          <div class="fg"><label>PayPal.me Link or Email</label><input type="text" id="pm-paypal-id" placeholder="paypal.me/aftabazmi or your@email.com"/></div>
+          <p style="font-size:.72rem;color:var(--muted);margin-top:6px;">Note: PayPal is mainly for international customers and doesn't generate a QR — customer will be shown your PayPal link.</p>
+        </div>
+
+        <div class="fg-btns"><button class="ap-btn ap-btn-primary" onclick="savePaymentSettings()">💾 Save Payment Settings</button></div>
+      </div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="ap-section" id="aps-orders">
+      <div class="ap-card">
+        <div class="ap-card-head">
+          <h3>🧾 Pre-Orders (<span id="orderCount">0</span>)</h3>
+          <button class="ap-btn ap-btn-danger" onclick="clearAllOrders()" style="font-size:.75rem;padding:6px 12px;">🗑️ Clear All</button>
+        </div>
+        <div id="adminOrdersList"><p style="color:var(--muted);font-size:.85rem;">No pre-orders yet.</p></div>
+      </div>
+    </div>
+
+    <!-- STORE INFO -->
+    <div class="ap-section" id="aps-store">
+      <div class="ap-card">
+        <div class="ap-card-head"><h3>🏪 Edit Store Information</h3></div>
+        <div class="si-grid">
+          <div class="fg"><label>Store Name</label><input type="text" id="si-name"/></div>
+          <div class="fg"><label>Tagline</label><input type="text" id="si-tagline"/></div>
+          <div class="fg"><label>Phone Number</label><input type="text" id="si-phone1"/></div>
+          <div class="fg"><label>WhatsApp Number</label><input type="text" id="si-phone2"/></div>
+          <div class="fg"><label>Email</label><input type="text" id="si-email"/></div>
+          <div class="fg"><label>Store Timings</label><input type="text" id="si-timing"/></div>
+          <div class="fg"><label>Address</label><input type="text" id="si-address"/></div>
+          <div class="fg"><label>Google Maps Link</label><input type="text" id="si-maps"/></div>
+          <div class="fg"><label>Facebook URL</label><input type="text" id="si-fb"/></div>
+          <div class="fg"><label>Facebook URL #2 (optional)</label><input type="text" id="si-fb2" placeholder="https://facebook.com/yourpage2"/></div>
+          <div class="fg"><label>Instagram URL</label><input type="text" id="si-ig"/></div>
+          <div class="fg"><label>Instagram URL #2 (optional)</label><input type="text" id="si-ig2" placeholder="https://instagram.com/yourpage2"/></div>
+          <div class="fg"><label>YouTube URL</label><input type="text" id="si-yt"/></div>
+          <div class="fg"><label>Stat: Total Models</label><input type="text" id="si-stat1"/></div>
+          <div class="fg"><label>Stat: Brands Count</label><input type="text" id="si-stat2"/></div>
+          <div class="fg"><label>Stat: Happy Customers</label><input type="text" id="si-stat3"/></div>
+        </div>
+        <div class="fg-btns"><button class="ap-btn ap-btn-primary" onclick="saveStoreInfo()">💾 Save Store Info</button></div>
+      </div>
+    </div>
+
+    <!-- HERO -->
+    <div class="ap-section" id="aps-hero">
+      <div class="ap-card">
+        <div class="ap-card-head"><h3>🏠 Edit Hero Section</h3></div>
+        <div class="fg-grid">
+          <div class="fg"><label>Badge Text</label><input type="text" id="hi-badge"/></div>
+          <div class="fg"><label>Heading Line 1</label><input type="text" id="hi-h1"/></div>
+          <div class="fg"><label>Heading Line 2 (colored)</label><input type="text" id="hi-h2"/></div>
+          <div class="fg full"><label>Description</label><textarea id="hi-desc"></textarea></div>
+          <div class="fg"><label>Button 1 Text</label><input type="text" id="hi-btn1"/></div>
+          <div class="fg"><label>Button 2 Text</label><input type="text" id="hi-btn2"/></div>
+        </div>
+        <div class="fg-btns"><button class="ap-btn ap-btn-primary" onclick="saveHero()">💾 Save Hero</button></div>
+      </div>
+    </div>
+
+  </div><!-- ap-body -->
+</div><!-- adminPanel -->
+
+<!-- ══════════════════════════════════════════
+     MAIN WEBSITE
+══════════════════════════════════════════ -->
+<nav>
+  <div class="logo" onclick="showPage('home')">
+    <div class="logo-icon">📱</div>
+    <span id="siteLogoName">Mobile Gallery</span>
+  </div>
+  <ul class="nav-links" id="navLinks">
+    <li><a onclick="showPage('home')" class="active" id="nav-home">Home</a></li>
+    <li><a onclick="showPage('phones')" id="nav-phones">Phones</a></li>
+    <li><a onclick="showPage('gadgets')" id="nav-gadgets">Gadgets</a></li>
+    <li><a onclick="showPage('brands')" id="nav-brands">Brands</a></li>
+    <li><a onclick="showPage('events')" id="nav-events">Events</a></li>
+    <li><a onclick="showPage('about')" id="nav-about">About Us</a></li>
+    <li><a onclick="showPage('gallery')" id="nav-gallery">Gallery</a></li>
+    <li><a onclick="showPage('contact')" id="nav-contact">Contact</a></li>
+    <li><a onclick="showPage('reviews')" id="nav-reviews">⭐ Reviews</a></li>
+    <li class="nav-user-item" id="navSettingsUser" style="display:none;">
+      <a onclick="openProfile()">👤 <span id="navUsername">My Profile</span></a>
+    </li>
+    <li class="nav-settings-item" id="navSettingsLogout" style="display:none;">
+      <a onclick="logoutUser()">🚪 Logout</a>
+    </li>
+  </ul>
+  <div class="nav-right">
+    <button class="admin-btn" onclick="openAdminLogin()">⚙️ Admin Panel</button>
+    <!-- User button: shows Login or username -->
+    <button class="user-nav-btn" id="userNavBtn" onclick="handleUserNavClick()">
+      👤 <span id="userNavLabel">Login / Register</span>
+    </button>
+    <button class="nav-cta" onclick="showPage('contact')">📞 Contact Us</button>
+  </div>
+  <div class="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- HOME PAGE -->
+<div class="page active" id="page-home">
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge" id="heroBadgeEl">Bihar's #1 Mobile Store</div>
+      <h1 id="heroH1El">The Biggest<br><span id="heroH2El">Mobile Store</span></h1>
+      <p id="heroDescEl">Samsung, Apple, Vivo, Oppo, Xiaomi, Realme and many more brands – all in one place. Best price guarantee every day!</p>
+      <div class="hero-btns">
+        <button class="btn-primary" onclick="showPage('phones')" id="heroBtn1El">📱 Browse Phones</button>
+        <button class="btn-secondary" onclick="showPage('contact')" id="heroBtn2El">Ask Us Anything</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><h3 id="heroStat1">500+</h3><p>Phone Models</p></div>
+        <div class="stat"><h3 id="heroStat2">15+</h3><p>Brands</p></div>
+        <div class="stat"><h3 id="heroStat3">10K+</h3><p>Happy Customers</p></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="phone-mockup">📱</div>
+      <div class="brand-orbit" id="brandOrbit"></div>
+    </div>
+  </section>
+
+  <div class="brands-strip">
+    <div class="brands-track" id="brandsMarquee"></div>
+  </div>
+
+  <section class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Hot Deals</div>
+      <h2 class="section-title">Featured Phones</h2>
+      <p class="section-sub">Our most popular phones at the best prices</p>
+    </div>
+    <div class="phones-grid" id="featuredGrid"></div>
+    <div style="text-align:center;margin-top:34px;">
+      <button class="btn-primary" onclick="showPage('phones')">View All Phones →</button>
+    </div>
+  </section>
+
+  <section class="section" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <div class="section-header">
+      <div class="section-eyebrow">Why Choose Us</div>
+      <h2 class="section-title">Why Mobile Gallery?</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;">
+      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">✅</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">100% Original Phones</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">Only authentic phones – no copies, no duplicates</p></div>
+      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">💰</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">Best Price Guarantee</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">Find it cheaper elsewhere, we'll beat the price!</p></div>
+      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">🔧</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">Free After-Sale Service</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">We're here after purchase too – free setup & support</p></div>
+      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">📦</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">Easy Exchange Policy</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">Exchange your old phone and upgrade affordably</p></div>
+      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">💳</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">EMI Available</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">Take your favourite phone home in easy installments</p></div>
+      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">⭐</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">10,000+ Happy Customers</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">Thousands of satisfied customers trust us every day</p></div>
+    </div>
+  </section>
+</div>
+
+<!-- PHONES PAGE -->
+<div class="page" id="page-phones">
+  <section class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Our Collection</div>
+      <h2 class="section-title">All Phones</h2>
+      <p class="section-sub">Filter by brand to find your perfect phone</p>
+    </div>
+    <div class="filter-bar" id="filterBar"></div>
+    <div class="phones-grid" id="allPhonesGrid"></div>
+  </section>
+</div>
+
+<!-- GADGETS PAGE -->
+<div class="page" id="page-gadgets">
+  <section class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Accessories & More</div>
+      <h2 class="section-title">Gadgets & Accessories</h2>
+      <p class="section-sub">Smart watches, earbuds, headphones, covers, tempered glass and much more</p>
+    </div>
+    <div class="filter-bar" id="gadgetFilterBar"></div>
+    <div class="phones-grid" id="gadgetsGrid"></div>
+  </section>
+</div>
+
+<!-- BRANDS PAGE -->
+<div class="page" id="page-brands">
+  <section class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Available Brands</div>
+      <h2 class="section-title">All Brands</h2>
+      <p class="section-sub">Top phone brands from around the world – all available here</p>
+    </div>
+    <div class="brands-grid" id="brandsPageGrid"></div>
+    <div style="margin-top:55px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:30px;">
+      <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:18px;text-align:center;">🎁 Special Offers with Every Purchase</h3>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;">
+        <div style="text-align:center;padding:14px;"><div style="font-size:1.9rem;margin-bottom:7px;">📱</div><div style="font-weight:700;margin-bottom:3px;">Free Screen Guard</div><div style="font-size:.78rem;color:var(--muted);">Screen protection with every phone</div></div>
+        <div style="text-align:center;padding:14px;"><div style="font-size:1.9rem;margin-bottom:7px;">🎧</div><div style="font-weight:700;margin-bottom:3px;">Earphones Gift</div><div style="font-size:.78rem;color:var(--muted);">Free earphones on selected phones</div></div>
+        <div style="text-align:center;padding:14px;"><div style="font-size:1.9rem;margin-bottom:7px;">🔋</div><div style="font-weight:700;margin-bottom:3px;">Free Data Transfer</div><div style="font-size:.78rem;color:var(--muted);">We migrate your old phone data free</div></div>
+        <div style="text-align:center;padding:14px;"><div style="font-size:1.9rem;margin-bottom:7px;">📦</div><div style="font-weight:700;margin-bottom:3px;">Box Pack Guarantee</div><div style="font-size:.78rem;color:var(--muted);">Only sealed original box phones</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- EVENTS PAGE -->
+<div class="page" id="page-events">
+  <section class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Latest Happenings</div>
+      <h2 class="section-title">Events & Offers</h2>
+      <p class="section-sub">Stay updated with our latest events, sales, and special offers at Aftab Azmi's Mobile Gallery</p>
+    </div>
+    <div class="events-grid" id="eventsPageGrid">
+      <div style="grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--muted);">
+        <div style="font-size:4rem;margin-bottom:16px;">🎉</div>
+        <p style="font-size:1rem;">No events yet. Check back soon!</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ABOUT PAGE -->
+<div class="page" id="page-about">
+  <section class="section">
+    <div class="about-grid">
+      <div class="about-visual">
+        <div style="font-size:5.5rem;margin-bottom:18px;">🏪</div>
+        <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:7px;" id="aboutStoreName">Mobile Gallery</h3>
+        <p style="color:var(--muted);font-size:.87rem;margin-bottom:18px;">India's trusted mobile store – serving since 2015</p>
+        <div class="about-features">
+          <div class="feature-item"><div class="feature-icon">✅</div><div class="feature-title">Original Products</div><div class="feature-desc">100% authentic phones</div></div>
+          <div class="feature-item"><div class="feature-icon">🏆</div><div class="feature-title">Award Winning</div><div class="feature-desc">Best store 2023</div></div>
+          <div class="feature-item"><div class="feature-icon">👥</div><div class="feature-title">Expert Staff</div><div class="feature-desc">Trained professionals</div></div>
+          <div class="feature-item"><div class="feature-icon">🔒</div><div class="feature-title">Warranty</div><div class="feature-desc">Official warranty</div></div>
+        </div>
+      </div>
+      <div class="about-text">
+        <div style="font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:10px;">Our Story</div>
+        <h2>Your Trusted <span>Mobile Partner</span></h2>
+        <p>Mobile Gallery was founded in 2015 with a simple idea – give every customer in Bihar a reliable place to buy genuine phones from all major brands, at honest prices, without any compromise.</p>
+        <p>Today we're proud to have served over 10,000 happy customers who keep coming back. Our team of experienced mobile experts helps you choose the best phone for your budget and needs.</p>
+        <p>Whether your budget is ₹8,000 or ₹1,50,000 – we find the best option for you. That's our promise.</p>
+        <div style="background:rgba(108,63,255,.1);border:1px solid rgba(108,63,255,.25);border-radius:12px;padding:16px 18px;margin-top:18px;font-size:.88rem;color:var(--accent2);line-height:1.7;">
+          📍 Located at <strong>Karjain Road, Simrahi Bazar, Bihar 852111</strong> — visit us anytime from Monday to Saturday, 10 AM – 9 PM.
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:65px;">
+      <div class="section-header">
+        <div class="section-eyebrow">Our Journey</div>
+        <h2 class="section-title">Since 2015</h2>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;border-top:3px solid var(--accent);"><div style="font-size:1.3rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">2015</div><div style="font-weight:700;margin:7px 0 3px;">Founded</div><div style="font-size:.8rem;color:var(--muted);">Started with a small shop at Simrahi Bazar</div></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;border-top:3px solid var(--accent2);"><div style="font-size:1.3rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">2018</div><div style="font-weight:700;margin:7px 0 3px;">Expansion</div><div style="font-size:.8rem;color:var(--muted);">Added 10+ brands, doubled the store size</div></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;border-top:3px solid var(--gold);"><div style="font-size:1.3rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">2021</div><div style="font-weight:700;margin:7px 0 3px;">5,000+ Customers</div><div style="font-size:.8rem;color:var(--muted);">Crossed 5,000 satisfied customer milestone</div></div>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;border-top:3px solid var(--accent);"><div style="font-size:1.3rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">2024</div><div style="font-weight:700;margin:7px 0 3px;">Award Winner</div><div style="font-size:.8rem;color:var(--muted);">Recognized as Best Mobile Store of the Year</div></div>
+      </div>
+    </div>
+
+    <div style="margin-top:55px;">
+      <div class="section-header"><div class="section-eyebrow">Our Team</div><h2 class="section-title">The Experts</h2></div>
+      <div class="team-grid">
+        <div class="team-card"><div class="team-avatar">👨‍💼</div><div class="team-name">Aftab Azmi</div><div class="team-role">Store Owner & Manager</div></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- GALLERY PAGE -->
+<div class="page" id="page-gallery">
+  <section class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Our Shop</div>
+      <h2 class="section-title">Shop Gallery</h2>
+      <p class="section-sub">Take a look inside our store — Aftab Azmi's Mobile Gallery, Simrahi Bazar</p>
+    </div>
+    <div class="gallery-grid" id="galleryPageGrid">
+      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);">
+        <div style="font-size:4rem;margin-bottom:14px;">🖼️</div>
+        <p>No photos yet. Add photos from the Admin Panel!</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- CONTACT PAGE -->
+<div class="page" id="page-contact">
+  <section class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Get In Touch</div>
+      <h2 class="section-title">Contact Us</h2>
+      <p class="section-sub">Have a question? We're always here to help!</p>
+    </div>
+    <div class="contact-grid">
+      <div>
+        <div class="contact-item"><div class="contact-icon">📍</div><div><div class="contact-label">Our Address</div><div class="contact-value" id="ci-address">Karjain Road, Simrahi Bazar, Bihar 852111, India</div></div></div>
+        <div class="contact-item"><div class="contact-icon">📞</div><div><div class="contact-label">Phone Number</div><div class="contact-value" id="ci-phone1">0300-1234567</div></div></div>
+        <div class="contact-item"><div class="contact-icon">💬</div><div><div class="contact-label">WhatsApp</div><div class="contact-value" id="ci-phone2">0300-1234567</div></div></div>
+        <div class="contact-item"><div class="contact-icon">📧</div><div><div class="contact-label">Email</div><div class="contact-value" id="ci-email">info@mobilegallery.in</div></div></div>
+        <div class="contact-item"><div class="contact-icon">⏰</div><div><div class="contact-label">Store Timings</div><div class="contact-value" id="ci-timing">Mon–Sat: 10 AM – 9 PM</div></div></div>
+
+        <div style="border-radius:14px;overflow:hidden;border:1px solid var(--border);margin-top:18px;">
+          <iframe src="https://www.google.com/maps?q=Mobile+Gallery,+Karjain+road,+Simrahi+Bazar,+Bihar+852111,+India&output=embed"
+            width="100%" height="200" style="border:0;display:block;" allowfullscreen="" loading="lazy"></iframe>
+        </div>
+        <a href="https://maps.app.goo.gl/VqmTRuia7hJc9kg76" target="_blank" id="ci-mapslink"
+          style="display:flex;align-items:center;gap:8px;background:rgba(108,63,255,.1);border:1px solid rgba(108,63,255,.3);
+          color:#a78bff;padding:10px 14px;border-radius:10px;font-size:.83rem;font-weight:600;text-decoration:none;margin-top:10px;">
+          📍 Open in Google Maps →
+        </a>
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:14px;">
+          <h4 style="font-size:.88rem;font-weight:700;margin-bottom:12px;">📲 Follow Us</h4>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <span style="background:rgba(29,161,242,.1);border:1px solid rgba(29,161,242,.3);color:#1da1f2;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('fb')">Facebook</span>
+            <span id="ci-fb2-btn" style="display:none;background:rgba(29,161,242,.1);border:1px solid rgba(29,161,242,.3);color:#1da1f2;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('fb2')">Facebook 2</span>
+            <span style="background:rgba(225,48,108,.1);border:1px solid rgba(225,48,108,.3);color:#e1306c;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('ig')">Instagram</span>
+            <span id="ci-ig2-btn" style="display:none;background:rgba(225,48,108,.1);border:1px solid rgba(225,48,108,.3);color:#e1306c;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('ig2')">Instagram 2</span>
+            <span style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);color:#25d366;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('wa')">WhatsApp</span>
+            <span style="background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.3);color:#ff0000;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('yt')">YouTube</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-form">
+        <h3>📩 Send Us a Message</h3>
+        <div class="form-row">
+          <div class="form-group"><label>Your Name</label><input type="text" placeholder="e.g. Rahul Sharma" id="formName"/></div>
+          <div class="form-group"><label>Phone Number</label><input type="text" placeholder="98765-43210" id="formPhone"/></div>
+        </div>
+        <div class="form-group"><label>Email (optional)</label><input type="email" placeholder="your@email.com" id="formEmail"/></div>
+        <div class="form-group"><label>Which Brand Are You Interested In?</label>
+          <select id="formBrand">
+            <option value="">-- Select Brand --</option>
+            <option>Apple iPhone</option><option>Samsung Galaxy</option><option>Vivo</option>
+            <option>Oppo</option><option>Xiaomi / Redmi</option><option>Realme</option>
+            <option>Tecno</option><option>Infinix</option><option>Need Guidance</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Your Budget</label>
+          <select id="formBudget">
+            <option value="">-- Select Budget --</option>
+            <option>₹8,000 – ₹15,000</option><option>₹15,000 – ₹30,000</option>
+            <option>₹30,000 – ₹60,000</option><option>₹60,000 – ₹1,00,000</option><option>₹1,00,000+</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Message / Question</label><textarea placeholder="Type your question or requirement…" id="formMsg"></textarea></div>
+        <button class="submit-btn" onclick="sendMessage()">📤 Send Message</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- REVIEWS PAGE -->
+<div class="page" id="page-reviews">
+  <section class="section">
+    <div class="section-header">
+      <div class="section-eyebrow">Customer Feedback</div>
+      <h2 class="section-title">Reviews & Ratings</h2>
+      <p class="section-sub">What our customers say about Aftab Azmi's Mobile Gallery</p>
+    </div>
+
+    <!-- Summary -->
+    <div class="reviews-summary" id="reviewsSummary">
+      <div class="reviews-avg" id="reviewsAvgNum">—</div>
+      <div class="reviews-avg-stars" id="reviewsAvgStars">⭐⭐⭐⭐⭐</div>
+      <div class="reviews-total" id="reviewsTotal">No reviews yet</div>
+    </div>
+
+    <!-- Add Review Box -->
+    <div class="add-review-box" id="addReviewBox">
+      <h3>✍️ Write Your Review</h3>
+      <div id="reviewLoginNote" class="review-login-note" style="display:none;">
+        👤 Please <span style="color:var(--accent2);cursor:pointer;font-weight:600;" onclick="openLogin()">Login</span> or <span style="color:var(--accent2);cursor:pointer;font-weight:600;" onclick="openRegister()">Register</span> to write a review.
+      </div>
+      <div id="reviewFormInner">
+        <div style="font-size:.85rem;color:var(--muted);margin-bottom:8px;">Select your rating:</div>
+        <div class="star-picker" id="starPicker">
+          <span onclick="setReviewStar(1)" data-star="1">☆</span>
+          <span onclick="setReviewStar(2)" data-star="2">☆</span>
+          <span onclick="setReviewStar(3)" data-star="3">☆</span>
+          <span onclick="setReviewStar(4)" data-star="4">☆</span>
+          <span onclick="setReviewStar(5)" data-star="5">☆</span>
+        </div>
+        <div class="auth-field" style="margin-bottom:14px;">
+          <label style="font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">Apna Review Likhein</label>
+          <textarea id="reviewText" placeholder="Share your experience at our store…"
+            style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);
+            padding:12px 14px;border-radius:10px;font-size:.88rem;font-family:'Poppins',sans-serif;
+            resize:vertical;min-height:90px;outline:none;"></textarea>
+        </div>
+        <button class="review-submit-btn" onclick="submitReview()">⭐ Submit Review</button>
+      </div>
+    </div>
+
+    <!-- Reviews Grid -->
+    <div class="reviews-grid" id="reviewsGrid">
+      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);">
+        <div style="font-size:3rem;margin-bottom:12px;">⭐</div>
+        <p>Abhi koi review nahi. Pehle review dein!</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">📱 <span id="footerStoreName">Mobile Gallery</span></div>
+      <p class="footer-desc" id="footerDesc">India's trusted mobile store – serving since 2015. All brands, best prices, 100% original. Karjain Road, Simrahi Bazar, Bihar.</p>
+      <div class="social-row">
+        <div class="social-btn" onclick="openSocial('fb')">📘</div>
+        <div class="social-btn" onclick="openSocial('ig')">📸</div>
+        <div class="social-btn" onclick="openSocial('wa')">💬</div>
+        <div class="social-btn" onclick="openSocial('yt')">🎥</div>
+      </div>
+    </div>
+    <div class="footer-col"><h4>Quick Links</h4><ul>
+      <li><a onclick="showPage('home')">Home</a></li>
+      <li><a onclick="showPage('phones')">All Phones</a></li>
+      <li><a onclick="showPage('brands')">Brands</a></li>
+      <li><a onclick="showPage('events')">🎉 Events</a></li>
+      <li><a onclick="showPage('about')">About Us</a></li>
+      <li><a onclick="showPage('contact')">Contact</a></li>
+      <li><a onclick="showPage('reviews')">⭐ Reviews</a></li>
+    </ul></div>
+    <div class="footer-col"><h4>Brands</h4><ul id="footerBrandsList"></ul></div>
+    <div class="footer-col"><h4>Services</h4><ul>
+      <li><a>Phone Exchange</a></li><li><a>EMI / Installment</a></li>
+      <li><a>Free Accessories</a></li><li><a>After-Sale Support</a></li><li><a>Data Transfer</a></li>
+    </ul></div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2024 <span id="footerCopyName">Mobile Gallery</span> – All Rights Reserved</div>
+    <div style="font-size:.8rem;color:var(--muted);">Karjain Road, Simrahi Bazar, Bihar, India</div>
+  </div>
+</footer>
+
+<!-- ══ REGISTER MODAL ══ -->
+<div class="auth-overlay" id="registerOverlay">
+  <div class="auth-box">
+    <button class="auth-close" onclick="closeRegister()">✕</button>
+    <div class="auth-logo">📱</div>
+    <div class="auth-title">Create Account</div>
+    <div class="auth-sub">Register at Aftab Azmi's Mobile Gallery</div>
+    <div class="auth-error" id="regError"></div>
+    <div class="auth-field"><label>Full Name *</label><input type="text" id="reg-name" placeholder="Your full name"/></div>
+    <div class="auth-field"><label>Username *</label><input type="text" id="reg-username" placeholder="Unique username (no spaces)"/></div>
+    <div class="auth-field"><label>Email *</label><input type="email" id="reg-email" placeholder="your@email.com"/></div>
+    <div class="auth-field"><label>Phone Number *</label><input type="tel" id="reg-phone" placeholder="10-digit mobile number"/></div>
+    <div class="auth-field"><label>Password *</label><input type="password" id="reg-pass" placeholder="Min 6 characters"/></div>
+    <div class="auth-field"><label>Confirm Password *</label><input type="password" id="reg-pass2" placeholder="Confirm your password"/></div>
+    <button class="auth-btn" onclick="doRegister()" id="regBtn">✅ Create Account</button>
+    <div class="auth-spinner" id="regSpinner"></div>
+    <div class="auth-switch">Already have an account? <span onclick="switchToLogin()">Login</span></div>
+  </div>
+</div>
+
+<!-- ══ LOGIN MODAL ══ -->
+<div class="auth-overlay" id="loginOverlay">
+  <div class="auth-box">
+    <button class="auth-close" onclick="closeLogin()">✕</button>
+    <div class="auth-logo">🔑</div>
+    <div class="auth-title">Welcome Back!</div>
+    <div class="auth-sub">Login to your account</div>
+    <div class="auth-error" id="loginError2"></div>
+    <div class="auth-field"><label>Email or Username *</label><input type="text" id="log-id" placeholder="Enter email or username"/></div>
+    <div class="auth-field"><label>Password *</label><input type="password" id="log-pass" placeholder="Your password"/></div>
+    <button class="auth-btn" onclick="doLogin()" id="loginBtn">🔑 Login</button>
+    <div class="auth-spinner" id="loginSpinner"></div>
+    <div class="auth-switch">Don't have an account? <span onclick="switchToRegister()">Register</span></div>
+  </div>
+</div>
+
+<!-- ══ PROFILE OVERLAY ══ -->
+<div class="profile-overlay" id="profileOverlay">
+  <div class="profile-box">
+    <button class="auth-close" onclick="closeProfile()">✕</button>
+    <div class="profile-avatar" id="profileAvatar">👤</div>
+    <div class="profile-username" id="profileUsername">Username</div>
+    <div class="profile-email" id="profileEmailDisplay">email@example.com</div>
+
+    <div class="profile-section-title">📋 Account Info</div>
+    <div class="profile-info-row"><span class="profile-info-label">Full Name</span><span class="profile-info-value" id="profileName">—</span></div>
+    <div class="profile-info-row"><span class="profile-info-label">Username</span><span class="profile-info-value" id="profileUsernameInfo">—</span></div>
+    <div class="profile-info-row"><span class="profile-info-label">Email</span><span class="profile-info-value" id="profileEmailInfo">—</span></div>
+    <div class="profile-info-row"><span class="profile-info-label">Phone</span><span class="profile-info-value" id="profilePhoneInfo">—</span></div>
+    <div class="profile-info-row"><span class="profile-info-label">Member Since</span><span class="profile-info-value" id="profileJoined">—</span></div>
+
+    <div class="profile-section-title">🔒 Change Password</div>
+    <div class="auth-error" id="pwdError"></div>
+    <div class="auth-field pwd-field"><label>Current Password</label><input type="password" id="pwd-current" placeholder="Current password"/></div>
+    <div class="auth-field pwd-field"><label>New Password</label><input type="password" id="pwd-new" placeholder="New password (min 6 chars)"/></div>
+    <div class="auth-field pwd-field"><label>Confirm New Password</label><input type="password" id="pwd-confirm" placeholder="Confirm new password"/></div>
+    <button class="profile-btn profile-btn-primary" onclick="changePassword()" style="margin-top:4px;">🔒 Change Password</button>
+    <button class="profile-btn profile-btn-danger" onclick="logoutUser()" style="margin-top:8px;">🚪 Logout</button>
+  </div>
+</div>
+
+<!-- PHONE DETAIL OVERLAY -->
+<div id="phoneDetailOverlay">
+  <div class="pd-container">
+    <div class="pd-back" onclick="closePhoneDetail()">← Back to Phones</div>
+    <div class="pd-body">
+      <div class="pd-img-col">
+        <div class="pd-img-section" id="pdImgSection">
+          <span class="pd-img-emoji" id="pdEmoji">📱</span>
+          <span class="pd-stock-badge" id="pdStockBadge" style="display:none;"></span>
+          <span class="pd-badge-overlay phone-badge" id="pdBadgeOverlay" style="display:none;"></span>
+        </div>
+        <div class="pd-thumb-row" id="pdThumbRow" style="display:none;"></div>
+      </div>
+      <div class="pd-info">
+        <div class="pd-brand-tag" id="pdBrand">Brand</div>
+        <div class="pd-name" id="pdName">Phone Name</div>
+        <div class="pd-price-row">
+          <div class="pd-price" id="pdPrice">₹0</div>
+          <span class="pd-price-tag">Best Price Guarantee ✓</span>
+        </div>
+        <div class="pd-specs-box">
+          <h4>Key Specifications</h4>
+          <div id="pdSpecsList"></div>
+        </div>
+        <div class="pd-features">
+          <span class="pd-feat-pill">✅ 100% Original</span>
+          <span class="pd-feat-pill">📦 Box Pack</span>
+          <span class="pd-feat-pill">🔧 Warranty</span>
+          <span class="pd-feat-pill">💳 EMI Available</span>
+          <span class="pd-feat-pill">📲 Free Setup</span>
+        </div>
+        <div class="pd-actions" style="margin-top:20px;">
+          <button class="pd-btn-wa" onclick="inquireWhatsApp()">💬 WhatsApp Inquiry</button>
+          <button class="pd-btn-call" onclick="callStore()">📞 Call Store</button>
+          <button class="pd-btn-preorder" id="pdPreorderBtn" onclick="openPreorder()" style="display:none;">🎯 Pre-Order Now (Pay Advance)</button>
+        </div>
+        <div style="margin-top:14px;background:rgba(108,63,255,.08);border:1px solid rgba(108,63,255,.2);
+          border-radius:10px;padding:12px 14px;font-size:.8rem;color:var(--muted);line-height:1.6;">
+          📍 <strong style="color:var(--text);">Aftab Azmi's Mobile Gallery</strong> — Karjain Road, Simrahi Bazar, Bihar 852111
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRE-ORDER MODAL — STEP 1: Customer Details + % ══ -->
+<div class="preorder-overlay" id="preorderOverlay">
+  <div class="preorder-box">
+    <button class="auth-close" onclick="closePreorder()">✕</button>
+    <div class="auth-logo">🎯</div>
+    <div class="auth-title">Pre-Order This Phone</div>
+    <div class="auth-sub">Reserve now by paying a small advance</div>
+
+    <div class="preorder-product-summary" id="preorderProductSummary"></div>
+
+    <div style="font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Choose Down Payment</div>
+    <div class="preorder-pct-row" id="preorderPctRow"></div>
+
+    <div class="preorder-amount-box">
+      <div class="amt" id="preorderAmountDisplay">₹0</div>
+      <div class="lbl">Advance amount to pay now</div>
+    </div>
+
+    <div class="auth-error" id="preorderError"></div>
+    <div class="auth-field"><label>Full Name *</label><input type="text" id="po-name" placeholder="Your full name"/></div>
+    <div class="auth-field"><label>Mobile Number *</label><input type="tel" id="po-phone" placeholder="10-digit mobile number"/></div>
+    <div class="auth-field"><label>Email (optional)</label><input type="email" id="po-email" placeholder="your@email.com"/></div>
+
+    <button class="auth-btn" onclick="proceedToPayment()">Continue to Payment →</button>
+  </div>
+</div>
+
+<!-- ══ PAYMENT PAGE — STEP 2: Select Method + QR ══ -->
+<div class="payment-overlay" id="paymentOverlay">
+  <div class="payment-box" id="paymentBoxContent">
+    <button class="auth-close" onclick="closePayment()">✕</button>
+    <div style="font-size:.8rem;color:var(--muted);">Pay Advance Amount</div>
+    <div class="payment-amount-display" id="paymentAmountDisplay">₹0</div>
+    <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px;" id="paymentForProduct"></div>
+
+    <div class="payment-method-grid" id="paymentMethodGrid"></div>
+
+    <div class="payment-qr-box" id="paymentQrBox">
+      <img id="paymentQrImg" alt="UPI QR Code"/>
+      <div class="payment-upi-id" id="paymentUpiIdDisplay"></div>
+    </div>
+
+    <div id="paypalLinkBox" style="display:none;margin:16px 0;">
+      <a id="paypalLinkAnchor" href="#" target="_blank" class="auth-btn" style="display:inline-block;text-decoration:none;">Open PayPal →</a>
+    </div>
+
+    <div class="payment-steps" id="paymentStepsBox" style="display:none;">
+      <strong style="color:var(--text);">How to pay:</strong><br/>
+      1. Open your UPI app (the one you selected)<br/>
+      2. Scan the QR code above<br/>
+      3. Enter the exact amount shown<br/>
+      4. Complete the payment<br/>
+      5. Tap "I've Paid" below to confirm your order
+    </div>
+
+    <button class="payment-confirm-btn" id="paymentConfirmBtn" onclick="confirmPaymentDone()" style="display:none;">✅ I've Paid — Confirm Order</button>
+    <div class="payment-back-link" onclick="backToPreorder()">← Back to order details</div>
+  </div>
+</div>
+
+<!-- ══ PAYMENT SUCCESS ══ -->
+<div class="payment-overlay" id="paymentSuccessOverlay">
+  <div class="payment-box">
+    <div class="payment-success-icon">🎉</div>
+    <div class="auth-title">Order Placed Successfully!</div>
+    <p style="font-size:.85rem;color:var(--muted);margin:10px 0 4px;line-height:1.6;">
+      Your pre-order has been recorded. Our team will verify your payment and contact you within a few hours to confirm.
+    </p>
+    <p style="font-size:.8rem;color:var(--accent2);font-weight:600;margin-bottom:18px;" id="orderRefDisplay"></p>
+    <button class="auth-btn" onclick="closeAllPaymentModals()">Done</button>
+  </div>
+</div>
+
+<!-- GADGET DETAIL OVERLAY -->
+<div id="gadgetDetailOverlay">
+  <div class="pd-container">
+    <div class="pd-back" onclick="closeGadgetDetail()">← Back to Gadgets</div>
+    <div class="pd-body">
+      <div class="pd-img-col">
+        <div class="pd-img-section" id="gdImgSection">
+          <span class="pd-img-emoji" id="gdEmoji">📦</span>
+          <span class="pd-stock-badge" id="gdStockBadge" style="display:none;"></span>
+          <span class="pd-badge-overlay phone-badge" id="gdBadgeOverlay" style="display:none;"></span>
+        </div>
+      </div>
+      <div class="pd-info">
+        <div class="pd-brand-tag" id="gdCat">Category</div>
+        <div class="pd-name" id="gdName">Product Name</div>
+        <div class="pd-price-row">
+          <div class="pd-price" id="gdPrice">₹0</div>
+          <span class="pd-price-tag">Best Price Guarantee ✓</span>
+        </div>
+        <div class="pd-specs-box">
+          <h4>Product Description</h4>
+          <div id="gdDescBox" style="font-size:.85rem;color:var(--text);line-height:1.7;"></div>
+        </div>
+        <div class="pd-features">
+          <span class="pd-feat-pill">✅ 100% Original</span>
+          <span class="pd-feat-pill">📦 Sealed Pack</span>
+          <span class="pd-feat-pill">🔧 Warranty</span>
+        </div>
+        <div class="pd-actions" style="margin-top:20px;">
+          <button class="pd-btn-wa" onclick="inquireGadgetWhatsApp()">💬 WhatsApp Inquiry</button>
+          <button class="pd-btn-call" onclick="callStore()">📞 Call Store</button>
+        </div>
+        <div style="margin-top:14px;background:rgba(108,63,255,.08);border:1px solid rgba(108,63,255,.2);
+          border-radius:10px;padding:12px 14px;font-size:.8rem;color:var(--muted);line-height:1.6;">
+          📍 <strong style="color:var(--text);">Aftab Azmi's Mobile Gallery</strong> — Karjain Road, Simrahi Bazar, Bihar 852111
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GALLERY LIGHTBOX -->
+<div id="galleryLightbox">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <img class="lb-img" id="lbImage" src="" alt=""/>
+  <div class="lb-caption" id="lbCaption"></div>
+  <div class="lb-sub" id="lbSub"></div>
+</div>
+
+<div id="toast"></div>
+
+<!-- ══════════════════════════════════════════
+     MASTER SCRIPT
+══════════════════════════════════════════ -->
+
+<!-- ══════════════════════════════════════════
+     SCRIPTS — load order matters! Each file
+     depends on globals/functions defined in
+     the files loaded before it.
+══════════════════════════════════════════ -->
+<script src="js/data.js"></script>
+<script src="js/render.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/core.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/payments.js"></script>
+<script src="js/firebase.js"></script>
+</body>
+</html>
