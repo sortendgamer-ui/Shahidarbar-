@@ -1,1101 +1,967 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Mobile Gallery – Best Phones in Simrahi Bazar, Bihar</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shahi Darbar — Multi Cuisine Restaurant & Banquet, Simrahi Bazar</title>
+<meta name="description" content="Shahi Darbar Multi Cuisine Restaurant, Hotel Shahi Palace & Marriage Hall — NH27, Simrahi Bazar. Royal dining, banquets, and hospitality.">
 
-<!-- Firebase SDK (v9 compat) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Marcellus&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 
-<!-- Cashfree Payments SDK — opens the secure checkout popup (UPI/GPay/PhonePe/Paytm/Cards) -->
-<script src="https://sdk.cashfree.com/js/v3/cashfree.js"></script>
+<style>
+  :root{
+    --ink-900:#080B1E;
+    --ink-800:#0A0E27;
+    --ink-700:#141a3d;
+    --surface:#141936;
+    --surface-line: rgba(212,175,55,0.18);
+    --gold:#D4AF37;
+    --gold-soft:#E9CD7A;
+    --marigold:#B5482A;
+    --wine:#7A1F3D;
+    --ivory:#F5E9CE;
+    --ivory-dim: rgba(245,233,206,0.62);
+    --ivory-faint: rgba(245,233,206,0.34);
+  }
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--ink-800);
+    color:var(--ivory);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+    font-weight:300;
+  }
+  ::selection{background:var(--gold); color:var(--ink-900);}
 
-<!-- All styles -->
-<link rel="stylesheet" href="css/style.css"/>
+  h1,h2,h3,.display{
+    font-family:'Cormorant Garamond', serif;
+    font-weight:600;
+    letter-spacing:0.01em;
+  }
+  .label{
+    font-family:'Inter',sans-serif;
+    text-transform:uppercase;
+    letter-spacing:0.32em;
+    font-size:0.68rem;
+    font-weight:500;
+    color:var(--gold);
+  }
+
+  a{color:inherit; text-decoration:none;}
+  img{display:block; width:100%; height:100%; object-fit:cover;}
+
+  /* ---------- scroll reveal ---------- */
+  .reveal{
+    opacity:0;
+    transform:translateY(36px);
+    transition:opacity 1.1s cubic-bezier(.16,.9,.2,1), transform 1.1s cubic-bezier(.16,.9,.2,1);
+  }
+  .reveal.in{opacity:1; transform:translateY(0);}
+  .reveal-delay-1{transition-delay:.12s;}
+  .reveal-delay-2{transition-delay:.24s;}
+  .reveal-delay-3{transition-delay:.36s;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important;}
+  }
+
+  /* ---------- ambient grain / vignette ---------- */
+  .grain{
+    position:fixed; inset:0; pointer-events:none; z-index:500;
+    opacity:0.035; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .vignette{
+    position:fixed; inset:0; pointer-events:none; z-index:400;
+    background:radial-gradient(ellipse at 50% 40%, transparent 45%, rgba(4,5,15,0.55) 100%);
+  }
+
+  /* ---------- top nav ---------- */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:900;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:22px 5vw;
+    transition:background .5s ease, padding .5s ease, border-color .5s ease;
+    border-bottom:1px solid transparent;
+  }
+  header.scrolled{
+    background:rgba(8,11,30,0.82);
+    backdrop-filter:blur(14px);
+    padding:14px 5vw;
+    border-bottom:1px solid var(--surface-line);
+  }
+  .brand{
+    display:flex; align-items:center; gap:12px;
+    font-family:'Marcellus', serif;
+    font-size:1.28rem;
+    letter-spacing:0.06em;
+  }
+  .brand .crest{
+    width:34px; height:34px;
+    border:1px solid var(--gold);
+    border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+  }
+  .brand .crest::before{
+    content:"";
+    width:14px; height:14px;
+    border:1px solid var(--gold);
+    transform:rotate(45deg);
+  }
+  nav{display:flex; gap:2.6rem; align-items:center;}
+  nav a{
+    font-size:0.78rem; letter-spacing:0.14em; text-transform:uppercase;
+    color:var(--ivory-dim);
+    position:relative;
+    padding-bottom:4px;
+  }
+  nav a::after{
+    content:""; position:absolute; left:0; bottom:0; height:1px; width:0;
+    background:var(--gold); transition:width .4s ease;
+  }
+  nav a:hover{color:var(--ivory);}
+  nav a:hover::after{width:100%;}
+  .nav-cta{
+    border:1px solid var(--gold); padding:9px 20px; border-radius:2px;
+    font-size:0.72rem; letter-spacing:0.16em; text-transform:uppercase;
+    color:var(--gold-soft) !important;
+  }
+  .nav-cta::after{display:none;}
+  .nav-cta:hover{background:var(--gold); color:var(--ink-900) !important;}
+  #navToggle{display:none;}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    height:100svh;
+    min-height:620px;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  #heroCanvas{
+    position:absolute; inset:0; z-index:1;
+  }
+  .hero-bg-img{
+    position:absolute; inset:0; z-index:0;
+    opacity:0.5;
+  }
+  .hero-bg-img img{
+    width:100%; height:100%; object-fit:cover;
+    filter:saturate(1.15) brightness(0.55);
+    transform:scale(1.08);
+  }
+  .hero-gradient{
+    position:absolute; inset:0; z-index:2;
+    background:
+      linear-gradient(180deg, rgba(8,11,30,0.35) 0%, rgba(8,11,30,0.25) 40%, rgba(8,11,30,0.92) 100%),
+      radial-gradient(ellipse 70% 55% at 50% 42%, rgba(10,14,39,0.15), rgba(8,11,30,0.85) 78%);
+  }
+
+  .hero-content{
+    position:relative; z-index:3;
+    text-align:center;
+    padding:0 6vw;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  .hero-eyebrow{
+    display:flex; align-items:center; gap:14px;
+    color:var(--gold); font-size:0.72rem; letter-spacing:0.4em; text-transform:uppercase;
+    margin-bottom:1.6rem;
+    opacity:0;
+    animation:fadeUp 1.2s .3s cubic-bezier(.16,.9,.2,1) forwards;
+  }
+  .hero-eyebrow .line{width:36px; height:1px; background:var(--gold);}
+  .hero h1{
+    font-size:clamp(3.2rem, 9vw, 7.4rem);
+    line-height:0.98;
+    color:var(--ivory);
+    text-shadow:0 4px 60px rgba(0,0,0,0.5);
+    opacity:0;
+    animation:fadeUp 1.3s .5s cubic-bezier(.16,.9,.2,1) forwards;
+  }
+  .hero h1 em{
+    font-style:italic;
+    background:linear-gradient(120deg, var(--gold-soft), var(--gold) 45%, #a8842f);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero-sub{
+    max-width:560px;
+    margin-top:1.6rem;
+    font-family:'Cormorant Garamond', serif;
+    font-size:1.32rem;
+    font-style:italic;
+    color:var(--ivory-dim);
+    opacity:0;
+    animation:fadeUp 1.3s .75s cubic-bezier(.16,.9,.2,1) forwards;
+  }
+  .hero-actions{
+    margin-top:2.6rem;
+    display:flex; gap:1.1rem; flex-wrap:wrap; justify-content:center;
+    opacity:0;
+    animation:fadeUp 1.3s .95s cubic-bezier(.16,.9,.2,1) forwards;
+  }
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(24px);} to{opacity:1; transform:translateY(0);} }
+
+  .btn{
+    display:inline-flex; align-items:center; gap:10px;
+    padding:15px 30px;
+    font-size:0.76rem; letter-spacing:0.16em; text-transform:uppercase;
+    border-radius:2px;
+    transition:all .35s cubic-bezier(.16,.9,.2,1);
+  }
+  .btn-primary{
+    background:linear-gradient(120deg, var(--gold-soft), var(--gold));
+    color:var(--ink-900);
+    font-weight:600;
+  }
+  .btn-primary:hover{transform:translateY(-3px); box-shadow:0 14px 34px -10px rgba(212,175,55,0.5);}
+  .btn-outline{
+    border:1px solid rgba(245,233,206,0.35);
+    color:var(--ivory);
+  }
+  .btn-outline:hover{border-color:var(--gold); color:var(--gold-soft); transform:translateY(-3px);}
+
+  .scroll-cue{
+    position:absolute; bottom:2.6rem; left:50%; transform:translateX(-50%);
+    z-index:3;
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    color:var(--ivory-faint);
+    font-size:0.62rem; letter-spacing:0.3em; text-transform:uppercase;
+  }
+  .scroll-cue .stem{
+    width:1px; height:38px;
+    background:linear-gradient(var(--gold), transparent);
+    position:relative; overflow:hidden;
+  }
+  .scroll-cue .stem::after{
+    content:""; position:absolute; top:-40%; left:0; width:100%; height:40%;
+    background:var(--gold-soft);
+    animation:cue 2.2s ease-in-out infinite;
+  }
+  @keyframes cue{ 0%{top:-40%;} 60%{top:100%;} 100%{top:100%;} }
+
+  /* ---------- section shell ---------- */
+  section{position:relative; padding:9rem 6vw;}
+  .section-inner{max-width:1240px; margin:0 auto;}
+  .kicker{
+    display:flex; align-items:center; gap:14px; margin-bottom:1.3rem;
+  }
+  .kicker .line{width:36px; height:1px; background:var(--gold);}
+  .section-title{
+    font-size:clamp(2.2rem, 4.6vw, 3.6rem);
+    color:var(--ivory);
+    max-width:720px;
+    line-height:1.08;
+  }
+  .section-title em{font-style:italic; color:var(--gold-soft);}
+  .section-lede{
+    font-family:'Cormorant Garamond', serif;
+    font-size:1.15rem;
+    font-style:italic;
+    color:var(--ivory-dim);
+    max-width:520px;
+    margin-top:1.1rem;
+    line-height:1.6;
+  }
+
+  /* subtle arch divider used between sections — signature motif */
+  .arch-divider{
+    position:relative;
+    height:120px;
+    display:flex; align-items:flex-end; justify-content:center;
+    margin:0 auto;
+    pointer-events:none;
+  }
+  .arch-divider svg{width:min(420px, 70vw); height:100%; opacity:0.55;}
+  .arch-divider path{
+    stroke:var(--gold); stroke-width:1; fill:none;
+    stroke-dasharray:600; stroke-dashoffset:600;
+  }
+  .arch-divider.in path{
+    animation:drawArch 1.8s cubic-bezier(.16,.9,.2,1) forwards;
+  }
+  @keyframes drawArch{ to{stroke-dashoffset:0;} }
+
+  /* ---------- about / heritage ---------- */
+  .about{
+    background:var(--ink-800);
+  }
+  .about-grid{
+    display:grid; grid-template-columns:1.05fr 0.95fr; gap:5vw; align-items:center; margin-top:4rem;
+  }
+  .about-visual{
+    position:relative;
+    aspect-ratio:4/5;
+    border-radius:4px;
+    overflow:hidden;
+    transform-style:preserve-3d;
+    box-shadow:0 40px 90px -30px rgba(0,0,0,0.7);
+  }
+  .about-visual img{
+    transition:transform 1.2s cubic-bezier(.16,.9,.2,1);
+  }
+  .about-visual:hover img{transform:scale(1.06);}
+  .about-visual::after{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(200deg, transparent 50%, rgba(8,11,30,0.55) 100%);
+    pointer-events:none;
+  }
+  .about-visual::before{
+    content:"";
+    position:absolute; inset:14px;
+    border:1px solid rgba(212,175,55,0.5);
+    z-index:2; pointer-events:none;
+  }
+  .about-copy p{
+    color:var(--ivory-dim);
+    line-height:1.85;
+    font-size:1.02rem;
+    margin-bottom:1.3rem;
+    font-weight:300;
+  }
+  .about-stats{
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:1.5rem;
+    margin-top:2.6rem;
+    border-top:1px solid var(--surface-line);
+    padding-top:2.2rem;
+  }
+  .stat .num{
+    font-family:'Cormorant Garamond', serif;
+    font-size:2.6rem;
+    color:var(--gold-soft);
+    line-height:1;
+  }
+  .stat .lbl{
+    font-size:0.68rem; letter-spacing:0.12em; text-transform:uppercase;
+    color:var(--ivory-faint);
+    margin-top:0.5rem;
+  }
+
+  /* ---------- experience / feature cards ---------- */
+  .experience{background:var(--ink-900);}
+  .exp-grid{
+    display:grid; grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    margin-top:4rem;
+    background:var(--surface-line);
+    border:1px solid var(--surface-line);
+  }
+  .exp-card{
+    background:var(--ink-900);
+    padding:3rem 2.2rem;
+    position:relative;
+    overflow:hidden;
+    min-height:340px;
+    display:flex; flex-direction:column; justify-content:flex-end;
+    transition:background .5s ease;
+  }
+  .exp-card .exp-num{
+    position:absolute; top:2rem; right:2.2rem;
+    font-family:'Cormorant Garamond', serif;
+    font-size:0.9rem;
+    color:var(--ivory-faint);
+    letter-spacing:0.1em;
+  }
+  .exp-card .exp-icon{
+    width:44px; height:44px; margin-bottom:1.6rem;
+    color:var(--gold);
+  }
+  .exp-card h3{
+    font-size:1.7rem; color:var(--ivory); margin-bottom:0.7rem; font-weight:500;
+  }
+  .exp-card p{
+    color:var(--ivory-dim); font-size:0.92rem; line-height:1.7; font-weight:300;
+  }
+  .exp-card::before{
+    content:""; position:absolute; inset:0;
+    background:radial-gradient(circle at 30% 20%, rgba(212,175,55,0.1), transparent 60%);
+    opacity:0; transition:opacity .5s ease;
+  }
+  .exp-card:hover::before{opacity:1;}
+  .exp-card:hover{background:var(--surface);}
+
+  /* ---------- gallery marquee-ish grid ---------- */
+  .gallery{background:var(--ink-800);}
+  .gallery-grid{
+    display:grid;
+    grid-template-columns:repeat(6, 1fr);
+    grid-template-rows:repeat(2, 220px);
+    gap:10px;
+    margin-top:4rem;
+  }
+  .g-item{
+    position:relative; overflow:hidden; border-radius:3px; cursor:pointer;
+  }
+  .g-item img{transition:transform 1.4s cubic-bezier(.16,.9,.2,1); filter:saturate(1.1);}
+  .g-item:hover img{transform:scale(1.12);}
+  .g-item::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(0deg, rgba(8,11,30,0.75), transparent 55%);
+  }
+  .g-item .g-tag{
+    position:absolute; left:16px; bottom:14px; z-index:2;
+    font-size:0.66rem; letter-spacing:0.16em; text-transform:uppercase;
+    color:var(--gold-soft);
+  }
+  .g1{grid-column:1/3; grid-row:1/3;}
+  .g2{grid-column:3/5; grid-row:1/2;}
+  .g3{grid-column:5/7; grid-row:1/2;}
+  .g4{grid-column:3/4; grid-row:2/3;}
+  .g5{grid-column:4/5; grid-row:2/3;}
+  .g6{grid-column:5/7; grid-row:2/3;}
+
+  /* ---------- menu highlight ---------- */
+  .menu{
+    background:linear-gradient(180deg, var(--ink-900), #0d1230 60%, var(--ink-900));
+    position:relative;
+  }
+  .menu-grid{
+    display:grid; grid-template-columns:repeat(2, 1fr);
+    gap:0 5vw;
+    margin-top:4rem;
+  }
+  .menu-col{border-top:1px solid var(--surface-line);}
+  .menu-row{
+    display:flex; justify-content:space-between; align-items:baseline;
+    gap:1rem;
+    padding:1.5rem 0;
+    border-bottom:1px solid var(--surface-line);
+  }
+  .menu-row .m-name{
+    font-family:'Cormorant Garamond', serif;
+    font-size:1.3rem; color:var(--ivory);
+  }
+  .menu-row .m-desc{
+    font-size:0.82rem; color:var(--ivory-faint); margin-top:0.3rem; font-weight:300;
+  }
+  .menu-row .m-price{
+    font-family:'Cormorant Garamond', serif;
+    font-size:1.15rem; color:var(--gold-soft);
+    white-space:nowrap;
+  }
+  .menu-note{
+    margin-top:3rem; text-align:center;
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    color:var(--ivory-faint); font-size:0.98rem;
+  }
+
+  /* ---------- banquet / event cta ---------- */
+  .banquet{
+    position:relative;
+    padding:0;
+    height:70vh; min-height:520px;
+    display:flex; align-items:center;
+    overflow:hidden;
+  }
+  .banquet-bg{position:absolute; inset:0; z-index:0;}
+  .banquet-bg img{filter:brightness(0.4) saturate(1.1);}
+  .banquet-bg::after{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(90deg, rgba(8,11,30,0.96) 15%, rgba(8,11,30,0.55) 60%, rgba(8,11,30,0.3));
+  }
+  .banquet-content{
+    position:relative; z-index:2; padding:0 6vw; max-width:640px;
+  }
+  .banquet h2{
+    font-size:clamp(2.4rem, 5vw, 3.8rem);
+    color:var(--ivory); margin-bottom:1.2rem; line-height:1.05;
+  }
+  .banquet p{
+    color:var(--ivory-dim); font-size:1.02rem; line-height:1.8; margin-bottom:2.2rem; max-width:480px;
+  }
+
+  /* ---------- testimonials ---------- */
+  .testimonials{background:var(--ink-800);}
+  .t-track-wrap{margin-top:4rem; overflow:hidden;}
+  .t-track{
+    display:flex; gap:1.6rem;
+  }
+  .t-card{
+    flex:0 0 min(420px, 82vw);
+    background:var(--surface);
+    border:1px solid var(--surface-line);
+    padding:2.4rem;
+    border-radius:3px;
+  }
+  .t-stars{color:var(--gold); letter-spacing:3px; font-size:0.9rem; margin-bottom:1.2rem;}
+  .t-quote{
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    font-size:1.18rem; line-height:1.65; color:var(--ivory);
+    margin-bottom:1.6rem;
+  }
+  .t-name{font-size:0.78rem; letter-spacing:0.08em; color:var(--gold-soft);}
+  .t-role{font-size:0.72rem; color:var(--ivory-faint); margin-top:0.2rem;}
+
+  /* ---------- contact / footer ---------- */
+  .contact{
+    background:var(--ink-900);
+    position:relative;
+  }
+  .contact-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:5vw;
+    margin-top:4rem;
+  }
+  .contact-item{
+    display:flex; gap:1.1rem; padding:1.6rem 0;
+    border-bottom:1px solid var(--surface-line);
+  }
+  .contact-item .ci-icon{
+    width:20px; height:20px; color:var(--gold); flex-shrink:0; margin-top:2px;
+  }
+  .contact-item .ci-label{
+    font-size:0.66rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--ivory-faint); margin-bottom:0.35rem;
+  }
+  .contact-item .ci-value{
+    font-family:'Cormorant Garamond', serif; font-size:1.2rem; color:var(--ivory);
+  }
+  .map-frame{
+    border-radius:3px; overflow:hidden; border:1px solid var(--surface-line);
+    aspect-ratio:4/3;
+  }
+  .map-frame iframe{width:100%; height:100%; border:0; filter:grayscale(0.3) invert(0.92) contrast(0.85);}
+
+  footer{
+    background:var(--ink-900);
+    border-top:1px solid var(--surface-line);
+    padding:3.4rem 6vw 2.2rem;
+    display:flex; flex-direction:column; align-items:center; gap:1.6rem;
+    text-align:center;
+  }
+  .footer-brand{font-family:'Marcellus', serif; font-size:1.4rem; color:var(--ivory); letter-spacing:0.06em;}
+  .footer-links{display:flex; gap:2rem; flex-wrap:wrap; justify-content:center;}
+  .footer-links a{font-size:0.72rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--ivory-faint);}
+  .footer-links a:hover{color:var(--gold-soft);}
+  .footer-fine{font-size:0.72rem; color:var(--ivory-faint); opacity:0.7;}
+
+  /* ---------- responsive ---------- */
+  @media (max-width:980px){
+    .about-grid{grid-template-columns:1fr; gap:3rem;}
+    .exp-grid{grid-template-columns:1fr;}
+    .contact-grid{grid-template-columns:1fr; gap:2rem;}
+    .gallery-grid{grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(4,180px);}
+    .g1{grid-column:1/3; grid-row:1/2;}
+    .g2{grid-column:1/2; grid-row:2/3;}
+    .g3{grid-column:2/3; grid-row:2/3;}
+    .g4{grid-column:1/2; grid-row:3/4;}
+    .g5{grid-column:2/3; grid-row:3/4;}
+    .g6{grid-column:1/3; grid-row:4/5;}
+    .menu-grid{grid-template-columns:1fr; gap:0;}
+  }
+  @media (max-width:760px){
+    nav{
+      position:fixed; top:0; right:0; height:100vh; width:78vw; max-width:340px;
+      background:rgba(8,11,30,0.98); backdrop-filter:blur(20px);
+      flex-direction:column; justify-content:center; align-items:flex-start;
+      padding:0 3rem; gap:2.2rem;
+      transform:translateX(100%); transition:transform .5s cubic-bezier(.16,.9,.2,1);
+      border-left:1px solid var(--surface-line);
+    }
+    #navToggle:checked ~ nav{transform:translateX(0);}
+    .nav-cta{margin-top:1rem;}
+    .menu-btn{
+      display:flex; flex-direction:column; justify-content:center; gap:5px;
+      width:26px; height:20px; cursor:pointer; z-index:950;
+    }
+    .menu-btn span{width:100%; height:1px; background:var(--ivory); transition:all .35s ease;}
+    #navToggle:checked ~ .menu-btn span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+    #navToggle:checked ~ .menu-btn span:nth-child(2){opacity:0;}
+    #navToggle:checked ~ .menu-btn span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+    section{padding:6rem 6vw;}
+    .about-stats{grid-template-columns:1fr; gap:1.4rem;}
+  }
+  @media (min-width:761px){
+    .menu-btn{display:none;}
+  }
+</style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════════
-     ADMIN LOGIN OVERLAY
-══════════════════════════════════════════ -->
-<div id="adminLoginOverlay">
-  <div class="login-box">
-    <div class="lock">🔐</div>
-    <h2>Admin <span>Login</span></h2>
-    <p>Restricted access – only for store owner</p>
-    <input type="email" id="adminUser" placeholder="Admin Email" autocomplete="off"/>
-    <input type="password" id="adminPass" placeholder="Password"/>
-    <button class="login-submit" onclick="doAdminLogin()">Login →</button>
-    <div class="login-error" id="loginError">❌ Wrong email or password!</div>
-    <button class="login-cancel" onclick="closeAdminLogin()">✕ Cancel</button>
-  </div>
-</div>
+<div class="grain"></div>
+<div class="vignette"></div>
 
-<!-- ══════════════════════════════════════════
-     ADMIN PANEL
-══════════════════════════════════════════ -->
-<div id="adminPanel">
-  <div class="ap-nav">
-    <div class="ap-logo">⚙️ <span>Admin Panel</span></div>
-    <div class="ap-tabs">
-      <button class="ap-tab active" onclick="apTab('dashboard',this)">📊 Dashboard</button>
-      <button class="ap-tab" onclick="apTab('phones',this)">📱 Phones</button>
-      <button class="ap-tab" onclick="apTab('gadgets',this)">🛍️ Gadgets</button>
-      <button class="ap-tab" onclick="apTab('brands',this)">🏷️ Brands</button>
-      <button class="ap-tab" onclick="apTab('events',this)">🎉 Events</button>
-      <button class="ap-tab" onclick="apTab('gallery',this)">🖼️ Gallery</button>
-      <button class="ap-tab" onclick="apTab('messages',this)">📩 Messages <span id="msgBadge" style="background:var(--red);color:#fff;font-size:.65rem;padding:1px 6px;border-radius:8px;margin-left:4px;display:none;">0</span></button>
-      <button class="ap-tab" onclick="apTab('reviews',this)">⭐ Reviews</button>
-      <button class="ap-tab" onclick="apTab('orders',this)">🧾 Orders <span id="orderBadge" style="background:var(--red);color:#fff;font-size:.65rem;padding:1px 6px;border-radius:8px;margin-left:4px;display:none;">0</span></button>
-      <button class="ap-tab" onclick="apTab('payment',this)">💳 Payment Setup</button>
-      <button class="ap-tab" onclick="apTab('store',this)">🏪 Store Info</button>
-      <button class="ap-tab" onclick="apTab('hero',this)">🏠 Hero</button>
-    </div>
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span id="fbStatus" style="font-size:.72rem;font-weight:700;padding:4px 10px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);border-radius:8px;color:var(--muted);white-space:nowrap;">💾 Local Only</span>
-      <button class="ap-close-btn" onclick="exitAdmin()">✕ Exit</button>
+<header id="siteHeader">
+  <a href="#top" class="brand">
+    <span class="crest"></span>
+    Shahi&nbsp;Darbar
+  </a>
+
+  <input type="checkbox" id="navToggle">
+  <nav>
+    <a href="#about">Heritage</a>
+    <a href="#experience">Experience</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#menu">Menu</a>
+    <a href="#banquet">Banquets</a>
+    <a href="#contact" class="nav-cta">Reserve</a>
+  </nav>
+  <label for="navToggle" class="menu-btn"><span></span><span></span><span></span></label>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" id="top">
+  <div class="hero-bg-img"><img src="images/facade-night-crop.jpg" alt="Shahi Darbar illuminated facade at night"></div>
+  <canvas id="heroCanvas"></canvas>
+  <div class="hero-gradient"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow"><span class="line"></span> Simrahi Bazar &nbsp;·&nbsp; NH 27 <span class="line"></span></div>
+    <h1>A <em>Royal</em><br>Table Awaits</h1>
+    <p class="hero-sub">Multi-cuisine dining, banquets, and hospitality — where every gathering becomes an occasion of splendour.</p>
+    <div class="hero-actions">
+      <a href="#menu" class="btn btn-primary">Explore the Menu</a>
+      <a href="#contact" class="btn btn-outline">Reserve a Table</a>
     </div>
   </div>
+  <div class="scroll-cue"><span>Descend</span><span class="stem"></span></div>
+</section>
 
-  <div class="ap-body">
+<!-- ============ ABOUT ============ -->
+<section class="about" id="about">
+  <div class="section-inner">
+    <div class="kicker reveal"><span class="line"></span><span class="label">Our Heritage</span></div>
+    <h2 class="section-title reveal reveal-delay-1">Hospitality fit for <em>royalty</em>, rooted in Simrahi</h2>
 
-    <!-- DASHBOARD -->
-    <div class="ap-section active" id="aps-dashboard">
-      <h2 style="font-size:1.3rem;font-weight:800;margin-bottom:6px;">Welcome, Admin 👋</h2>
-      <p style="color:var(--muted);font-size:.86rem;margin-bottom:22px;">Manage your entire store from here.</p>
-      <div class="ap-stats" id="apStatsRow"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
-        <div class="ap-card">
-          <div class="ap-card-head"><h3>⚡ Quick Actions</h3></div>
-          <div style="display:flex;flex-direction:column;gap:10px;">
-            <button class="ap-btn ap-btn-primary" onclick="apTabClick('phones')">📱 Add New Phone</button>
-            <button class="ap-btn ap-btn-edit" onclick="apTabClick('store')">🏪 Edit Store Info</button>
-            <button class="ap-btn ap-btn-edit" onclick="apTabClick('hero')">🏠 Edit Hero Section</button>
-            <button class="ap-btn ap-btn-edit" onclick="apTabClick('brands')">🏷️ Manage Brands</button>
-          </div>
-        </div>
-        <div class="ap-card">
-          <div class="ap-card-head"><h3>📋 Recent Phones</h3></div>
-          <div id="apRecentPhones"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PHONES -->
-    <div class="ap-section" id="aps-phones">
-      <div class="ap-card">
-        <div class="ap-card-head"><h3 id="phoneFormTitle">📱 Add New Phone</h3></div>
-        <div class="fg-grid c3">
-          <div class="fg"><label>Brand *</label>
-            <select id="pf-brand">
-              <option value="">-- Select Brand --</option>
-              <option>Apple</option><option>Samsung</option><option>Vivo</option>
-              <option>Oppo</option><option>Xiaomi</option><option>Realme</option>
-              <option>Tecno</option><option>Infinix</option><option>Nokia</option><option>OnePlus</option>
-            </select>
-          </div>
-          <div class="fg"><label>Phone Name *</label><input type="text" id="pf-name" placeholder="e.g. Galaxy A55"/></div>
-          <div class="fg"><label>Price *</label><input type="text" id="pf-price" placeholder="e.g. ₹25,999"/></div>
-          <div class="fg"><label>Specs / Description</label><input type="text" id="pf-specs" placeholder="e.g. 50MP • 128GB • 5000mAh"/></div>
-          <div class="fg"><label>Badge</label>
-            <select id="pf-badge">
-              <option value="">None</option>
-              <option value="new">NEW</option>
-              <option value="sale">SALE</option>
-              <option value="hot">HOT</option>
-            </select>
-          </div>
-          <div class="fg"><label>Stock Status</label>
-            <select id="pf-stock">
-              <option value="in">✅ In Stock</option>
-              <option value="out">⛔ Out of Stock</option>
-            </select>
-          </div>
-          <div class="fg"><label>Pre-Order Available?</label>
-            <select id="pf-preorder">
-              <option value="">No — Call Shop only</option>
-              <option value="yes">Yes — Allow Pre-Order</option>
-            </select>
-          </div>
-          <div class="fg"><label>Pre-Order Down Payment %</label>
-            <select id="pf-preorder-pct">
-              <option value="10">10%</option>
-              <option value="20">20%</option>
-              <option value="both">Let customer choose (10% or 20%)</option>
-            </select>
-          </div>
-          <div class="fg"><label>Emoji Icon (fallback)</label>
-            <input type="text" id="pf-icon" placeholder="📱" maxlength="2" value="📱"/>
-          </div>
-          <!-- PHOTO UPLOAD — 3 SLOTS -->
-          <div class="fg full">
-            <label>Phone Photos (Upload up to 3 images — 1st photo shows on Home & Listing cards)</label>
-            <div class="multi-photo-grid">
-              <div class="multi-photo-slot">
-                <span class="multi-photo-slot-num">1</span>
-                <div class="photo-upload-area" id="photoUploadArea1">
-                  <input type="file" id="pf-photo1" accept="image/*" onchange="previewPhoto(this,1)"/>
-                  <div class="photo-upload-label">📷 Main Photo<br><span>Cover image</span></div>
-                  <img id="photoPreviewImg1" class="photo-preview" alt="preview"/>
-                </div>
-                <input type="hidden" id="pf-photoData1" value=""/>
-              </div>
-              <div class="multi-photo-slot">
-                <span class="multi-photo-slot-num">2</span>
-                <div class="photo-upload-area" id="photoUploadArea2">
-                  <input type="file" id="pf-photo2" accept="image/*" onchange="previewPhoto(this,2)"/>
-                  <div class="photo-upload-label">📷 Photo 2<br><span>Optional</span></div>
-                  <img id="photoPreviewImg2" class="photo-preview" alt="preview"/>
-                </div>
-                <input type="hidden" id="pf-photoData2" value=""/>
-              </div>
-              <div class="multi-photo-slot">
-                <span class="multi-photo-slot-num">3</span>
-                <div class="photo-upload-area" id="photoUploadArea3">
-                  <input type="file" id="pf-photo3" accept="image/*" onchange="previewPhoto(this,3)"/>
-                  <div class="photo-upload-label">📷 Photo 3<br><span>Optional</span></div>
-                  <img id="photoPreviewImg3" class="photo-preview" alt="preview"/>
-                </div>
-                <input type="hidden" id="pf-photoData3" value=""/>
-              </div>
-            </div>
-          </div>
-        </div>
-        <input type="hidden" id="pf-editId" value=""/>
-        <div class="fg-btns">
-          <button class="ap-btn ap-btn-primary" onclick="savePhone()">💾 Save Phone</button>
-          <button class="ap-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);" onclick="clearPhoneForm()">✕ Clear</button>
-        </div>
-      </div>
-
-      <div class="ap-card">
-        <div class="ap-card-head">
-          <h3>All Phones (<span id="phonesCount">0</span>)</h3>
-          <input type="text" id="phoneSearch" placeholder="🔍 Search…" onkeyup="renderAdminPhones()"
-            style="background:var(--surface);border:1px solid var(--border);color:var(--text);
-            padding:7px 12px;border-radius:8px;font-size:.82rem;outline:none;width:180px;"/>
-        </div>
-        <div style="overflow-x:auto;">
-          <table class="ap-table">
-            <thead><tr><th>Photo</th><th>Brand</th><th>Name</th><th>Price</th><th>Badge</th><th>Actions</th></tr></thead>
-            <tbody id="adminPhonesTable"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- BRANDS -->
-    <div class="ap-section" id="aps-brands">
-      <div class="ap-card">
-        <div class="ap-card-head"><h3>🏷️ Add / Edit Brand</h3></div>
-        <div class="fg-grid">
-          <div class="fg"><label>Brand Name *</label><input type="text" id="bf-name" placeholder="e.g. Samsung"/></div>
-          <div class="fg"><label>Emoji Icon</label><input type="text" id="bf-icon" placeholder="📗" maxlength="2"/></div>
-          <div class="fg full"><label>Description</label><input type="text" id="bf-desc" placeholder="e.g. Galaxy Series • 30+ Models"/></div>
-        </div>
-        <input type="hidden" id="bf-editId"/>
-        <div class="fg-btns">
-          <button class="ap-btn ap-btn-primary" onclick="saveBrand()">💾 Save Brand</button>
-          <button class="ap-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);" onclick="clearBrandForm()">✕ Clear</button>
-        </div>
-      </div>
-      <div class="ap-card">
-        <div class="ap-card-head"><h3>All Brands (<span id="brandsCount">0</span>)</h3></div>
-        <div style="overflow-x:auto;">
-          <table class="ap-table">
-            <thead><tr><th>Icon</th><th>Name</th><th>Description</th><th>Phones</th><th>Actions</th></tr></thead>
-            <tbody id="adminBrandsTable"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- GADGETS ADMIN -->
-    <div class="ap-section" id="aps-gadgets">
-      <div class="ap-card">
-        <div class="ap-card-head"><h3 id="gadgetFormTitle">🛍️ Add New Product</h3></div>
-        <div class="fg-grid">
-          <div class="fg"><label>Category *</label>
-            <select id="gd-cat">
-              <option value="">-- Select Category --</option>
-              <option>Smart Watch</option><option>Earbuds</option><option>Earphones</option>
-              <option>Headphones</option><option>Phone Cover</option><option>Tempered Glass</option>
-              <option>Charger</option><option>Cable</option><option>Other</option>
-            </select>
-          </div>
-          <div class="fg"><label>Product Name *</label><input type="text" id="gd-name" placeholder="e.g. TWS Earbuds Pro"/></div>
-          <div class="fg"><label>Price *</label><input type="text" id="gd-price" placeholder="e.g. ₹1,499"/></div>
-          <div class="fg"><label>Icon Emoji (used if no photo uploaded)</label><input type="text" id="gd-icon" placeholder="e.g. 🎧" maxlength="4"/></div>
-          <div class="fg full">
-            <label>Product Photo (optional — overrides emoji icon if uploaded)</label>
-            <div class="photo-upload-area" id="gadgetPhotoUploadArea">
-              <input type="file" id="gd-photo" accept="image/*" onchange="previewGadgetPhoto(this)"/>
-              <div class="photo-upload-label">📷 Click to upload product photo<br><span>JPG, PNG, WEBP supported</span></div>
-              <img id="gadgetPhotoPreviewImg" class="photo-preview" alt="preview"/>
-            </div>
-            <input type="hidden" id="gd-photoData" value=""/>
-          </div>
-          <div class="fg full"><label>Short Description *</label><input type="text" id="gd-desc" placeholder="e.g. Active noise cancellation, 30hr battery, Bluetooth 5.3"/></div>
-          <div class="fg"><label>Badge</label>
-            <select id="gd-badge">
-              <option value="">None</option>
-              <option value="new">NEW</option>
-              <option value="sale">SALE</option>
-              <option value="hot">HOT</option>
-            </select>
-          </div>
-          <div class="fg"><label>Stock Status</label>
-            <select id="gd-stock">
-              <option value="in">✅ In Stock</option>
-              <option value="out">⛔ Out of Stock</option>
-            </select>
-          </div>
-        </div>
-        <input type="hidden" id="gd-editId" value=""/>
-        <div class="fg-btns">
-          <button class="ap-btn ap-btn-primary" onclick="saveGadget()">💾 Save Product</button>
-          <button class="ap-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);" onclick="clearGadgetForm()">✕ Clear</button>
-        </div>
-      </div>
-      <div class="ap-card">
-        <div class="ap-card-head"><h3>All Products (<span id="gadgetCount">0</span>)</h3></div>
-        <table class="ap-table">
-          <thead><tr><th>Category</th><th>Name</th><th>Price</th><th>Badge</th><th>Actions</th></tr></thead>
-          <tbody id="adminGadgetsTable"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- EVENTS ADMIN -->
-    <div class="ap-section" id="aps-events">
-      <div class="ap-card">
-        <div class="ap-card-head"><h3 id="eventFormTitle">🎉 Add New Event</h3></div>
-        <div class="fg-grid">
-          <div class="fg"><label>Event Title *</label><input type="text" id="ev-title" placeholder="e.g. Eid Special Sale 2025"/></div>
-          <div class="fg"><label>Badge Label</label><input type="text" id="ev-badge" placeholder="e.g. SALE, NEW, LIVE"/></div>
-          <div class="fg full"><label>Description *</label>
-            <textarea id="ev-desc" placeholder="Describe the event — offers, discounts, dates, details…"
-              style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);
-              padding:12px;border-radius:10px;font-family:'Poppins',sans-serif;font-size:.85rem;
-              min-height:80px;resize:vertical;outline:none;"></textarea>
-          </div>
-          <div class="fg"><label>Event Date</label><input type="text" id="ev-date" placeholder="e.g. 20 June 2025"/></div>
-          <div class="fg full">
-            <label>Event Photo</label>
-            <div class="photo-upload-area" id="eventUploadArea">
-              <input type="file" id="ev-photo" accept="image/*" onchange="previewEventPhoto(this)"/>
-              <div class="photo-upload-label">📷 Click to upload event photo<br><span>JPG, PNG, WEBP supported</span></div>
-              <img id="eventPreviewImg" class="photo-preview" alt="preview"/>
-            </div>
-            <input type="hidden" id="ev-photoData" value=""/>
-          </div>
-        </div>
-        <input type="hidden" id="ev-editId" value=""/>
-        <div class="fg-btns">
-          <button class="ap-btn ap-btn-primary" onclick="saveEvent()">💾 Save Event</button>
-          <button class="ap-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);" onclick="clearEventForm()">✕ Clear</button>
-        </div>
-      </div>
-      <div class="ap-card">
-        <div class="ap-card-head"><h3>All Events (<span id="eventCount">0</span>)</h3></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;" id="adminEventsGrid"></div>
-      </div>
-    </div>
-
-    <!-- GALLERY -->
-    <div class="ap-section" id="aps-gallery">
-      <div class="ap-card">
-        <div class="ap-card-head"><h3>🖼️ Add Shop Photo</h3></div>
-        <div class="fg-grid">
-          <div class="fg"><label>Photo Title *</label><input type="text" id="gf-title" placeholder="e.g. Store Front View"/></div>
-          <div class="fg full"><label>Description</label><input type="text" id="gf-desc" placeholder="e.g. Our beautiful shop entrance at Simrahi Bazar"/></div>
-          <div class="fg full">
-            <label>Upload Photo</label>
-            <div class="photo-upload-area" id="galleryUploadArea">
-              <input type="file" id="gf-photo" accept="image/*" onchange="previewGalleryPhoto(this)"/>
-              <div class="photo-upload-label">📷 Click to upload shop photo<br><span>JPG, PNG, WEBP supported</span></div>
-              <img id="galleryPreviewImg" class="photo-preview" alt="preview"/>
-            </div>
-            <input type="hidden" id="gf-photoData" value=""/>
-          </div>
-        </div>
-        <input type="hidden" id="gf-editId" value=""/>
-        <div class="fg-btns">
-          <button class="ap-btn ap-btn-primary" onclick="saveGalleryPhoto()">💾 Save Photo</button>
-          <button class="ap-btn" style="background:var(--surface);border:1px solid var(--border);color:var(--muted);" onclick="clearGalleryForm()">✕ Clear</button>
-        </div>
-      </div>
-      <div class="ap-card">
-        <div class="ap-card-head"><h3>All Gallery Photos (<span id="galleryCount">0</span>)</h3></div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;padding:4px 0;" id="adminGalleryGrid"></div>
-      </div>
-    </div>
-
-    <!-- MESSAGES -->
-    <div class="ap-section" id="aps-messages">
-      <div class="ap-card">
-        <div class="ap-card-head">
-          <h3>📩 Customer Messages (<span id="msgCount">0</span>)</h3>
-          <button class="ap-btn ap-btn-danger" onclick="clearAllMessages()" style="font-size:.75rem;padding:6px 12px;">🗑️ Clear All</button>
-        </div>
-        <div id="adminMsgList"><p style="color:var(--muted);font-size:.85rem;">No messages yet.</p></div>
-      </div>
-    </div>
-
-    <!-- REVIEWS ADMIN -->
-    <div class="ap-section" id="aps-reviews">
-      <div class="ap-card">
-        <div class="ap-card-head">
-          <h3>⭐ Customer Reviews (<span id="adminReviewCount">0</span>)</h3>
-          <div style="font-size:.82rem;color:var(--muted);">Average: <strong id="adminAvgRating">—</strong></div>
-        </div>
-        <div id="adminReviewList"><p style="color:var(--muted);font-size:.85rem;">No reviews yet.</p></div>
-      </div>
-    </div>
-
-    <!-- PAYMENT SETUP -->
-    <div class="ap-section" id="aps-payment">
-
-      <div class="ap-card" id="masterPaySwitchCard" style="border:1px solid var(--border);">
-        <div class="ap-card-head" style="margin-bottom:6px;">
-          <h3>🔌 Payment System Master Switch</h3>
-        </div>
-        <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px;line-height:1.6;">
-          Turn this OFF to immediately stop accepting any new pre-order payments site-wide. Customers will see the Pre-Order button disabled. Orders already in progress are not affected — they will complete normally.
-        </p>
-        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-          <div class="pay-toggle" id="masterPayToggle" onclick="toggleMasterPayment()"></div>
-          <span id="masterPayStatusLabel" style="font-weight:700;font-size:.9rem;">Loading...</span>
-          <button class="ap-btn ap-btn-edit ap-btn-sm" style="margin-left:auto;" onclick="reverifyPendingOrdersNow()">🔄 Re-check Pending Orders Now</button>
-        </div>
-      </div>
-
-      <div class="ap-card">
-        <div class="ap-card-head"><h3>💳 Configure Payment Methods (UPI QR)</h3></div>
-        <p style="font-size:.8rem;color:var(--muted);margin-bottom:18px;line-height:1.6;">
-          Enter your shop's UPI ID for each method you want to accept. A QR code is generated automatically — money goes <strong style="color:var(--text);">directly to your bank account</strong>. No middleman, no fees, 100% safe.
-        </p>
-
-        <div class="pay-method-card">
-          <div class="pay-method-head">
-            <h4>📱 Google Pay</h4>
-            <div class="pay-toggle" id="pm-toggle-gpay" onclick="togglePayMethod('gpay')"></div>
-          </div>
-          <div class="fg"><label>UPI ID (e.g. yourname@okicici)</label><input type="text" id="pm-gpay-upi" placeholder="aftabazmi@okicici"/></div>
-        </div>
-
-        <div class="pay-method-card">
-          <div class="pay-method-head">
-            <h4>💜 PhonePe</h4>
-            <div class="pay-toggle" id="pm-toggle-phonepe" onclick="togglePayMethod('phonepe')"></div>
-          </div>
-          <div class="fg"><label>UPI ID (e.g. yourname@ybl)</label><input type="text" id="pm-phonepe-upi" placeholder="aftabazmi@ybl"/></div>
-        </div>
-
-
-        <div class="pay-method-card">
-          <div class="pay-method-head">
-            <h4>🔵 Paytm</h4>
-            <div class="pay-toggle" id="pm-toggle-paytm" onclick="togglePayMethod('paytm')"></div>
-          </div>
-          <div class="fg"><label>UPI ID (e.g. yourname@paytm)</label><input type="text" id="pm-paytm-upi" placeholder="aftabazmi@paytm"/></div>
-        </div>
-
-        <div class="pay-method-card">
-          <div class="pay-method-head">
-            <h4>🅿️ PayPal</h4>
-            <div class="pay-toggle" id="pm-toggle-paypal" onclick="togglePayMethod('paypal')"></div>
-          </div>
-          <div class="fg"><label>PayPal.me Link or Email</label><input type="text" id="pm-paypal-id" placeholder="paypal.me/aftabazmi or your@email.com"/></div>
-          <p style="font-size:.72rem;color:var(--muted);margin-top:6px;">Note: PayPal is mainly for international customers and doesn't generate a QR — customer will be shown your PayPal link.</p>
-        </div>
-
-        <div class="fg-btns"><button class="ap-btn ap-btn-primary" onclick="savePaymentSettings()">💾 Save Payment Settings</button></div>
-      </div>
-    </div>
-
-    <!-- ORDERS -->
-    <div class="ap-section" id="aps-orders">
-      <div class="ap-card">
-        <div class="ap-card-head">
-          <h3>🧾 Pre-Orders (<span id="orderCount">0</span>)</h3>
-          <button class="ap-btn ap-btn-danger" onclick="clearAllOrders()" style="font-size:.75rem;padding:6px 12px;">🗑️ Clear All</button>
-        </div>
-        <div id="adminOrdersList"><p style="color:var(--muted);font-size:.85rem;">No pre-orders yet.</p></div>
-      </div>
-    </div>
-
-    <!-- STORE INFO -->
-    <div class="ap-section" id="aps-store">
-      <div class="ap-card">
-        <div class="ap-card-head"><h3>🏪 Edit Store Information</h3></div>
-        <div class="si-grid">
-          <div class="fg"><label>Store Name</label><input type="text" id="si-name"/></div>
-          <div class="fg"><label>Tagline</label><input type="text" id="si-tagline"/></div>
-          <div class="fg"><label>Phone Number</label><input type="text" id="si-phone1"/></div>
-          <div class="fg"><label>WhatsApp Number</label><input type="text" id="si-phone2"/></div>
-          <div class="fg"><label>Email</label><input type="text" id="si-email"/></div>
-          <div class="fg"><label>Store Timings</label><input type="text" id="si-timing"/></div>
-          <div class="fg"><label>Address</label><input type="text" id="si-address"/></div>
-          <div class="fg"><label>Google Maps Link</label><input type="text" id="si-maps"/></div>
-          <div class="fg"><label>Facebook URL</label><input type="text" id="si-fb"/></div>
-          <div class="fg"><label>Facebook URL #2 (optional)</label><input type="text" id="si-fb2" placeholder="https://facebook.com/yourpage2"/></div>
-          <div class="fg"><label>Instagram URL</label><input type="text" id="si-ig"/></div>
-          <div class="fg"><label>Instagram URL #2 (optional)</label><input type="text" id="si-ig2" placeholder="https://instagram.com/yourpage2"/></div>
-          <div class="fg"><label>YouTube URL</label><input type="text" id="si-yt"/></div>
-          <div class="fg"><label>Stat: Total Models</label><input type="text" id="si-stat1"/></div>
-          <div class="fg"><label>Stat: Brands Count</label><input type="text" id="si-stat2"/></div>
-          <div class="fg"><label>Stat: Happy Customers</label><input type="text" id="si-stat3"/></div>
-        </div>
-        <div class="fg-btns"><button class="ap-btn ap-btn-primary" onclick="saveStoreInfo()">💾 Save Store Info</button></div>
-      </div>
-    </div>
-
-    <!-- HERO -->
-    <div class="ap-section" id="aps-hero">
-      <div class="ap-card">
-        <div class="ap-card-head"><h3>🏠 Edit Hero Section</h3></div>
-        <div class="fg-grid">
-          <div class="fg"><label>Badge Text</label><input type="text" id="hi-badge"/></div>
-          <div class="fg"><label>Heading Line 1</label><input type="text" id="hi-h1"/></div>
-          <div class="fg"><label>Heading Line 2 (colored)</label><input type="text" id="hi-h2"/></div>
-          <div class="fg full"><label>Description</label><textarea id="hi-desc"></textarea></div>
-          <div class="fg"><label>Button 1 Text</label><input type="text" id="hi-btn1"/></div>
-          <div class="fg"><label>Button 2 Text</label><input type="text" id="hi-btn2"/></div>
-        </div>
-        <div class="fg-btns"><button class="ap-btn ap-btn-primary" onclick="saveHero()">💾 Save Hero</button></div>
-      </div>
-    </div>
-
-  </div><!-- ap-body -->
-</div><!-- adminPanel -->
-
-<!-- ══════════════════════════════════════════
-     MAIN WEBSITE
-══════════════════════════════════════════ -->
-<nav>
-  <div class="logo" onclick="showPage('home')">
-    <div class="logo-icon">📱</div>
-    <span id="siteLogoName">Mobile Gallery</span>
-  </div>
-  <ul class="nav-links" id="navLinks">
-    <li><a onclick="showPage('home')" class="active" id="nav-home">Home</a></li>
-    <li><a onclick="showPage('phones')" id="nav-phones">Phones</a></li>
-    <li><a onclick="showPage('gadgets')" id="nav-gadgets">Gadgets</a></li>
-    <li><a onclick="showPage('brands')" id="nav-brands">Brands</a></li>
-    <li><a onclick="showPage('events')" id="nav-events">Events</a></li>
-    <li><a onclick="showPage('about')" id="nav-about">About Us</a></li>
-    <li><a onclick="showPage('gallery')" id="nav-gallery">Gallery</a></li>
-    <li><a onclick="showPage('contact')" id="nav-contact">Contact</a></li>
-    <li><a onclick="showPage('reviews')" id="nav-reviews">⭐ Reviews</a></li>
-    <li class="nav-user-item" id="navSettingsUser" style="display:none;">
-      <a onclick="openProfile()">👤 <span id="navUsername">My Profile</span></a>
-    </li>
-    <li class="nav-settings-item" id="navSettingsLogout" style="display:none;">
-      <a onclick="logoutUser()">🚪 Logout</a>
-    </li>
-  </ul>
-  <div class="nav-right">
-    <button class="admin-btn" onclick="openAdminLogin()">⚙️ Admin Panel</button>
-    <!-- User button: shows Login or username -->
-    <button class="user-nav-btn" id="userNavBtn" onclick="handleUserNavClick()">
-      👤 <span id="userNavLabel">Login / Register</span>
-    </button>
-    <button class="nav-cta" onclick="showPage('contact')">📞 Contact Us</button>
-  </div>
-  <div class="hamburger" onclick="toggleMenu()">
-    <span></span><span></span><span></span>
-  </div>
-</nav>
-
-<!-- HOME PAGE -->
-<div class="page active" id="page-home">
-  <section class="hero">
-    <div class="hero-content">
-      <div class="hero-badge" id="heroBadgeEl">Bihar's #1 Mobile Store</div>
-      <h1 id="heroH1El">The Biggest<br><span id="heroH2El">Mobile Store</span></h1>
-      <p id="heroDescEl">Samsung, Apple, Vivo, Oppo, Xiaomi, Realme and many more brands – all in one place. Best price guarantee every day!</p>
-      <div class="hero-btns">
-        <button class="btn-primary" onclick="showPage('phones')" id="heroBtn1El">📱 Browse Phones</button>
-        <button class="btn-secondary" onclick="showPage('contact')" id="heroBtn2El">Ask Us Anything</button>
-      </div>
-      <div class="hero-stats">
-        <div class="stat"><h3 id="heroStat1">500+</h3><p>Phone Models</p></div>
-        <div class="stat"><h3 id="heroStat2">15+</h3><p>Brands</p></div>
-        <div class="stat"><h3 id="heroStat3">10K+</h3><p>Happy Customers</p></div>
-      </div>
-    </div>
-    <div class="hero-visual">
-      <div class="phone-mockup">📱</div>
-      <div class="brand-orbit" id="brandOrbit"></div>
-    </div>
-  </section>
-
-  <div class="brands-strip">
-    <div class="brands-track" id="brandsMarquee"></div>
-  </div>
-
-  <section class="section">
-    <div class="section-header">
-      <div class="section-eyebrow">Hot Deals</div>
-      <h2 class="section-title">Featured Phones</h2>
-      <p class="section-sub">Our most popular phones at the best prices</p>
-    </div>
-    <div class="phones-grid" id="featuredGrid"></div>
-    <div style="text-align:center;margin-top:34px;">
-      <button class="btn-primary" onclick="showPage('phones')">View All Phones →</button>
-    </div>
-  </section>
-
-  <section class="section" style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
-    <div class="section-header">
-      <div class="section-eyebrow">Why Choose Us</div>
-      <h2 class="section-title">Why Mobile Gallery?</h2>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;">
-      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">✅</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">100% Original Phones</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">Only authentic phones – no copies, no duplicates</p></div>
-      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">💰</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">Best Price Guarantee</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">Find it cheaper elsewhere, we'll beat the price!</p></div>
-      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">🔧</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">Free After-Sale Service</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">We're here after purchase too – free setup & support</p></div>
-      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">📦</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">Easy Exchange Policy</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">Exchange your old phone and upgrade affordably</p></div>
-      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">💳</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">EMI Available</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">Take your favourite phone home in easy installments</p></div>
-      <div class="feature-item" style="border-radius:14px;padding:22px;"><div style="font-size:1.9rem;margin-bottom:10px;">⭐</div><h3 style="font-size:.97rem;font-weight:700;margin-bottom:7px;">10,000+ Happy Customers</h3><p style="font-size:.83rem;color:var(--muted);line-height:1.6;">Thousands of satisfied customers trust us every day</p></div>
-    </div>
-  </section>
-</div>
-
-<!-- PHONES PAGE -->
-<div class="page" id="page-phones">
-  <section class="section">
-    <div class="section-header">
-      <div class="section-eyebrow">Our Collection</div>
-      <h2 class="section-title">All Phones</h2>
-      <p class="section-sub">Filter by brand to find your perfect phone</p>
-    </div>
-    <div class="filter-bar" id="filterBar"></div>
-    <div class="phones-grid" id="allPhonesGrid"></div>
-  </section>
-</div>
-
-<!-- GADGETS PAGE -->
-<div class="page" id="page-gadgets">
-  <section class="section">
-    <div class="section-header">
-      <div class="section-eyebrow">Accessories & More</div>
-      <h2 class="section-title">Gadgets & Accessories</h2>
-      <p class="section-sub">Smart watches, earbuds, headphones, covers, tempered glass and much more</p>
-    </div>
-    <div class="filter-bar" id="gadgetFilterBar"></div>
-    <div class="phones-grid" id="gadgetsGrid"></div>
-  </section>
-</div>
-
-<!-- BRANDS PAGE -->
-<div class="page" id="page-brands">
-  <section class="section">
-    <div class="section-header">
-      <div class="section-eyebrow">Available Brands</div>
-      <h2 class="section-title">All Brands</h2>
-      <p class="section-sub">Top phone brands from around the world – all available here</p>
-    </div>
-    <div class="brands-grid" id="brandsPageGrid"></div>
-    <div style="margin-top:55px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:30px;">
-      <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:18px;text-align:center;">🎁 Special Offers with Every Purchase</h3>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;">
-        <div style="text-align:center;padding:14px;"><div style="font-size:1.9rem;margin-bottom:7px;">📱</div><div style="font-weight:700;margin-bottom:3px;">Free Screen Guard</div><div style="font-size:.78rem;color:var(--muted);">Screen protection with every phone</div></div>
-        <div style="text-align:center;padding:14px;"><div style="font-size:1.9rem;margin-bottom:7px;">🎧</div><div style="font-weight:700;margin-bottom:3px;">Earphones Gift</div><div style="font-size:.78rem;color:var(--muted);">Free earphones on selected phones</div></div>
-        <div style="text-align:center;padding:14px;"><div style="font-size:1.9rem;margin-bottom:7px;">🔋</div><div style="font-weight:700;margin-bottom:3px;">Free Data Transfer</div><div style="font-size:.78rem;color:var(--muted);">We migrate your old phone data free</div></div>
-        <div style="text-align:center;padding:14px;"><div style="font-size:1.9rem;margin-bottom:7px;">📦</div><div style="font-weight:700;margin-bottom:3px;">Box Pack Guarantee</div><div style="font-size:.78rem;color:var(--muted);">Only sealed original box phones</div></div>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- EVENTS PAGE -->
-<div class="page" id="page-events">
-  <section class="section">
-    <div class="section-header">
-      <div class="section-eyebrow">Latest Happenings</div>
-      <h2 class="section-title">Events & Offers</h2>
-      <p class="section-sub">Stay updated with our latest events, sales, and special offers at Aftab Azmi's Mobile Gallery</p>
-    </div>
-    <div class="events-grid" id="eventsPageGrid">
-      <div style="grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--muted);">
-        <div style="font-size:4rem;margin-bottom:16px;">🎉</div>
-        <p style="font-size:1rem;">No events yet. Check back soon!</p>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- ABOUT PAGE -->
-<div class="page" id="page-about">
-  <section class="section">
     <div class="about-grid">
-      <div class="about-visual">
-        <div style="font-size:5.5rem;margin-bottom:18px;">🏪</div>
-        <h3 style="font-size:1.2rem;font-weight:800;margin-bottom:7px;" id="aboutStoreName">Mobile Gallery</h3>
-        <p style="color:var(--muted);font-size:.87rem;margin-bottom:18px;">India's trusted mobile store – serving since 2015</p>
-        <div class="about-features">
-          <div class="feature-item"><div class="feature-icon">✅</div><div class="feature-title">Original Products</div><div class="feature-desc">100% authentic phones</div></div>
-          <div class="feature-item"><div class="feature-icon">🏆</div><div class="feature-title">Award Winning</div><div class="feature-desc">Best store 2023</div></div>
-          <div class="feature-item"><div class="feature-icon">👥</div><div class="feature-title">Expert Staff</div><div class="feature-desc">Trained professionals</div></div>
-          <div class="feature-item"><div class="feature-icon">🔒</div><div class="feature-title">Warranty</div><div class="feature-desc">Official warranty</div></div>
-        </div>
+      <div class="about-visual reveal reveal-delay-1">
+        <img src="images/lounge-blue-crop.jpg" alt="Shahi Darbar dining lounge interior">
       </div>
-      <div class="about-text">
-        <div style="font-size:.75rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent2);margin-bottom:10px;">Our Story</div>
-        <h2>Your Trusted <span>Mobile Partner</span></h2>
-        <p>Mobile Gallery was founded in 2015 with a simple idea – give every customer in Bihar a reliable place to buy genuine phones from all major brands, at honest prices, without any compromise.</p>
-        <p>Today we're proud to have served over 10,000 happy customers who keep coming back. Our team of experienced mobile experts helps you choose the best phone for your budget and needs.</p>
-        <p>Whether your budget is ₹8,000 or ₹1,50,000 – we find the best option for you. That's our promise.</p>
-        <div style="background:rgba(108,63,255,.1);border:1px solid rgba(108,63,255,.25);border-radius:12px;padding:16px 18px;margin-top:18px;font-size:.88rem;color:var(--accent2);line-height:1.7;">
-          📍 Located at <strong>Karjain Road, Simrahi Bazar, Bihar 852111</strong> — visit us anytime from Monday to Saturday, 10 AM – 9 PM.
+      <div class="about-copy reveal reveal-delay-2">
+        <p>Rising along NH 27 in Simrahi Bazar, Shahi Darbar was built as more than a restaurant — it is a landmark of gathering. Beneath its glowing marble halls and gold-lit ceilings, Hotel Shahi Palace brings together fine multi-cuisine dining, a full-service marriage hall, and warm hospitality under one roof.</p>
+        <p>Every table is set with intention: contemporary interiors that catch the light, a kitchen that honours North Indian tradition alongside Chinese and Continental favourites, and a team that treats every guest — from a family dinner to a wedding of five hundred — like royalty.</p>
+        <div class="about-stats">
+          <div class="stat"><div class="num">4</div><div class="lbl">Floors of Hospitality</div></div>
+          <div class="stat"><div class="num">500+</div><div class="lbl">Banquet Capacity</div></div>
+          <div class="stat"><div class="num">3</div><div class="lbl">Cuisines Mastered</div></div>
         </div>
       </div>
     </div>
+  </div>
+</section>
 
-    <div style="margin-top:65px;">
-      <div class="section-header">
-        <div class="section-eyebrow">Our Journey</div>
-        <h2 class="section-title">Since 2015</h2>
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px;">
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;border-top:3px solid var(--accent);"><div style="font-size:1.3rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">2015</div><div style="font-weight:700;margin:7px 0 3px;">Founded</div><div style="font-size:.8rem;color:var(--muted);">Started with a small shop at Simrahi Bazar</div></div>
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;border-top:3px solid var(--accent2);"><div style="font-size:1.3rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">2018</div><div style="font-weight:700;margin:7px 0 3px;">Expansion</div><div style="font-size:.8rem;color:var(--muted);">Added 10+ brands, doubled the store size</div></div>
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;border-top:3px solid var(--gold);"><div style="font-size:1.3rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">2021</div><div style="font-weight:700;margin:7px 0 3px;">5,000+ Customers</div><div style="font-size:.8rem;color:var(--muted);">Crossed 5,000 satisfied customer milestone</div></div>
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;border-top:3px solid var(--accent);"><div style="font-size:1.3rem;font-weight:900;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">2024</div><div style="font-weight:700;margin:7px 0 3px;">Award Winner</div><div style="font-size:.8rem;color:var(--muted);">Recognized as Best Mobile Store of the Year</div></div>
-      </div>
-    </div>
-
-    <div style="margin-top:55px;">
-      <div class="section-header"><div class="section-eyebrow">Our Team</div><h2 class="section-title">The Experts</h2></div>
-      <div class="team-grid">
-        <div class="team-card"><div class="team-avatar">👨‍💼</div><div class="team-name">Aftab Azmi</div><div class="team-role">Store Owner & Manager</div></div>
-      </div>
-    </div>
-  </section>
+<div class="arch-divider" data-reveal-arch>
+  <svg viewBox="0 0 300 120"><path d="M10,120 L10,50 Q10,10 150,10 Q290,10 290,50 L290,120"/></svg>
 </div>
 
-<!-- GALLERY PAGE -->
-<div class="page" id="page-gallery">
-  <section class="section">
-    <div class="section-header">
-      <div class="section-eyebrow">Our Shop</div>
-      <h2 class="section-title">Shop Gallery</h2>
-      <p class="section-sub">Take a look inside our store — Aftab Azmi's Mobile Gallery, Simrahi Bazar</p>
-    </div>
-    <div class="gallery-grid" id="galleryPageGrid">
-      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted);">
-        <div style="font-size:4rem;margin-bottom:14px;">🖼️</div>
-        <p>No photos yet. Add photos from the Admin Panel!</p>
+<!-- ============ EXPERIENCE ============ -->
+<section class="experience" id="experience">
+  <div class="section-inner">
+    <div class="kicker reveal"><span class="line"></span><span class="label">The Experience</span></div>
+    <h2 class="section-title reveal reveal-delay-1">Three ways to be <em>welcomed</em></h2>
+
+    <div class="exp-grid">
+      <div class="exp-card reveal">
+        <span class="exp-num">01</span>
+        <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2v20M8 2v6a4 4 0 008 0V2M8 2H4v6a4 4 0 004 4M16 2h4v6a4 4 0 01-4 4"/></svg>
+        <h3>Fine Dining</h3>
+        <p>Multi-cuisine menus served in a dining hall of marble, brass light-lines and velvet seating — plated for celebration, every evening.</p>
+      </div>
+      <div class="exp-card reveal reveal-delay-1">
+        <span class="exp-num">02</span>
+        <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg>
+        <h3>Hotel Shahi Palace</h3>
+        <p>Comfortable stays above the restaurant floors, for travellers along NH 27 and guests attending events at the hall.</p>
+      </div>
+      <div class="exp-card reveal reveal-delay-2">
+        <span class="exp-num">03</span>
+        <svg class="exp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2l2.4 6.6L21 10l-5 4.4L17.4 21 12 17.3 6.6 21 8 14.4 3 10l6.6-1.4z"/></svg>
+        <h3>Weddings & Banquets</h3>
+        <p>A marriage hall dressed in marigold and light, built to host the full arc of a celebration — from mandap to midnight.</p>
       </div>
     </div>
-  </section>
+  </div>
+</section>
+
+<!-- ============ GALLERY ============ -->
+<section class="gallery" id="gallery">
+  <div class="section-inner">
+    <div class="kicker reveal"><span class="line"></span><span class="label">Glimpses</span></div>
+    <h2 class="section-title reveal reveal-delay-1">Step inside the <em>Darbar</em></h2>
+
+    <div class="gallery-grid">
+      <div class="g-item g1 reveal"><img src="images/facade-day-crop.jpg" alt="Shahi Darbar building facade"><span class="g-tag">The Facade</span></div>
+      <div class="g-item g2 reveal reveal-delay-1"><img src="images/interior-dining-crop.jpg" alt="Dining hall with ambient lighting"><span class="g-tag">Dining Hall</span></div>
+      <div class="g-item g3 reveal reveal-delay-2"><img src="images/facade-night-crop.jpg" alt="Illuminated entrance at night"><span class="g-tag">Evening Entrance</span></div>
+      <div class="g-item g4 reveal"><img src="images/food-wall-crop.jpg" alt="Casual dining seating area"><span class="g-tag">Family Seating</span></div>
+      <div class="g-item g5 reveal reveal-delay-1"><img src="images/lounge-blue-crop.jpg" alt="Blue-lit lounge seating"><span class="g-tag">The Lounge</span></div>
+      <div class="g-item g6 reveal reveal-delay-2"><img src="images/facade-day-crop.jpg" alt="Restaurant signage" style="object-position:top;"><span class="g-tag">Simrahi Bazar</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="arch-divider" data-reveal-arch>
+  <svg viewBox="0 0 300 120"><path d="M10,120 L10,50 Q10,10 150,10 Q290,10 290,50 L290,120"/></svg>
 </div>
 
-<!-- CONTACT PAGE -->
-<div class="page" id="page-contact">
-  <section class="section">
-    <div class="section-header">
-      <div class="section-eyebrow">Get In Touch</div>
-      <h2 class="section-title">Contact Us</h2>
-      <p class="section-sub">Have a question? We're always here to help!</p>
+<!-- ============ MENU ============ -->
+<section class="menu" id="menu">
+  <div class="section-inner">
+    <div class="kicker reveal"><span class="line"></span><span class="label">Signature Fare</span></div>
+    <h2 class="section-title reveal reveal-delay-1">A menu built on <em>three cuisines</em></h2>
+    <p class="section-lede reveal reveal-delay-1">A sampling from our multi-cuisine kitchen — North Indian, Chinese, and Continental, prepared fresh through the day.</p>
+
+    <div class="menu-grid">
+      <div class="menu-col reveal reveal-delay-1">
+        <div class="menu-row"><div><div class="m-name">Shahi Paneer Darbar</div><div class="m-desc">Cottage cheese in a royal cashew-tomato gravy</div></div><div class="m-price">₹ 260</div></div>
+        <div class="menu-row"><div><div class="m-name">Butter Chicken</div><div class="m-desc">Tandoor-roasted chicken, velvet tomato butter sauce</div></div><div class="m-price">₹ 320</div></div>
+        <div class="menu-row"><div><div class="m-name">Dal Makhani</div><div class="m-desc">Slow-simmered black lentils, cream, smoked butter</div></div><div class="m-price">₹ 210</div></div>
+        <div class="menu-row"><div><div class="m-name">Tandoori Platter</div><div class="m-desc">Chef's selection of clay-oven kebabs</div></div><div class="m-price">₹ 380</div></div>
+      </div>
+      <div class="menu-col reveal reveal-delay-2">
+        <div class="menu-row"><div><div class="m-name">Chicken Biryani</div><div class="m-desc">Long-grain basmati, layered spice, saffron</div></div><div class="m-price">₹ 290</div></div>
+        <div class="menu-row"><div><div class="m-name">Darbar Chowmein</div><div class="m-desc">Wok-tossed noodles, garden vegetables</div></div><div class="m-price">₹ 180</div></div>
+        <div class="menu-row"><div><div class="m-name">Chilli Paneer</div><div class="m-desc">Indo-Chinese classic, crisp and glazed</div></div><div class="m-price">₹ 230</div></div>
+        <div class="menu-row"><div><div class="m-name">Royal Thali</div><div class="m-desc">A complete banquet on a single plate</div></div><div class="m-price">₹ 340</div></div>
+      </div>
     </div>
+    <p class="menu-note reveal">Full à la carte and banquet menus available on request · Prices are indicative</p>
+  </div>
+</section>
+
+<!-- ============ BANQUET CTA ============ -->
+<section class="banquet" id="banquet">
+  <div class="banquet-bg"><img src="images/facade-night-crop.jpg" alt="Shahi Darbar wedding entrance decorated with flowers and lights"></div>
+  <div class="banquet-content reveal">
+    <div class="kicker"><span class="line"></span><span class="label">Marriage Hall</span></div>
+    <h2>Host your <em style="font-style:italic;color:var(--gold-soft);">celebration</em> in splendour</h2>
+    <p>From the marigold-lit mandap to a marble dance floor built to hold five hundred guests — Hotel Shahi Palace & Marriage Hall stages weddings, receptions, and functions with full catering, décor, and stay arrangements.</p>
+    <a href="#contact" class="btn btn-primary">Enquire About Bookings</a>
+  </div>
+</section>
+
+<!-- ============ TESTIMONIALS ============ -->
+<section class="testimonials">
+  <div class="section-inner">
+    <div class="kicker reveal"><span class="line"></span><span class="label">Guest Voices</span></div>
+    <h2 class="section-title reveal reveal-delay-1">What our guests <em>remember</em></h2>
+
+    <div class="t-track-wrap">
+      <div class="t-track reveal reveal-delay-1">
+        <div class="t-card">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-quote">The ambience feels straight out of a palace — the blue lighting and marble tables make every dinner feel like an occasion.</p>
+          <div class="t-name">A regular family diner</div>
+          <div class="t-role">Simrahi Bazar</div>
+        </div>
+        <div class="t-card">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-quote">We hosted our wedding function here — the entrance décor and hall service made the whole evening unforgettable.</p>
+          <div class="t-name">Wedding party guest</div>
+          <div class="t-role">Marriage Hall event</div>
+        </div>
+        <div class="t-card">
+          <div class="t-stars">★★★★★</div>
+          <p class="t-quote">Best multi-cuisine spot on NH 27 — the biryani and the tandoori platter never disappoint.</p>
+          <div class="t-name">Highway traveller</div>
+          <div class="t-role">Dinner guest</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="arch-divider" data-reveal-arch>
+  <svg viewBox="0 0 300 120"><path d="M10,120 L10,50 Q10,10 150,10 Q290,10 290,50 L290,120"/></svg>
+</div>
+
+<!-- ============ CONTACT ============ -->
+<section class="contact" id="contact">
+  <div class="section-inner">
+    <div class="kicker reveal"><span class="line"></span><span class="label">Visit Us</span></div>
+    <h2 class="section-title reveal reveal-delay-1">Find your way to the <em>Darbar</em></h2>
+
     <div class="contact-grid">
-      <div>
-        <div class="contact-item"><div class="contact-icon">📍</div><div><div class="contact-label">Our Address</div><div class="contact-value" id="ci-address">Karjain Road, Simrahi Bazar, Bihar 852111, India</div></div></div>
-        <div class="contact-item"><div class="contact-icon">📞</div><div><div class="contact-label">Phone Number</div><div class="contact-value" id="ci-phone1">0300-1234567</div></div></div>
-        <div class="contact-item"><div class="contact-icon">💬</div><div><div class="contact-label">WhatsApp</div><div class="contact-value" id="ci-phone2">0300-1234567</div></div></div>
-        <div class="contact-item"><div class="contact-icon">📧</div><div><div class="contact-label">Email</div><div class="contact-value" id="ci-email">info@mobilegallery.in</div></div></div>
-        <div class="contact-item"><div class="contact-icon">⏰</div><div><div class="contact-label">Store Timings</div><div class="contact-value" id="ci-timing">Mon–Sat: 10 AM – 9 PM</div></div></div>
-
-        <div style="border-radius:14px;overflow:hidden;border:1px solid var(--border);margin-top:18px;">
-          <iframe src="https://www.google.com/maps?q=Mobile+Gallery,+Karjain+road,+Simrahi+Bazar,+Bihar+852111,+India&output=embed"
-            width="100%" height="200" style="border:0;display:block;" allowfullscreen="" loading="lazy"></iframe>
+      <div class="reveal reveal-delay-1">
+        <div class="contact-item">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <div><div class="ci-label">Address</div><div class="ci-value">Shahi Darbar, NH 27, Simrahi Bazar, Simarahi, Bihar 852111</div></div>
         </div>
-        <a href="https://maps.app.goo.gl/VqmTRuia7hJc9kg76" target="_blank" id="ci-mapslink"
-          style="display:flex;align-items:center;gap:8px;background:rgba(108,63,255,.1);border:1px solid rgba(108,63,255,.3);
-          color:#a78bff;padding:10px 14px;border-radius:10px;font-size:.83rem;font-weight:600;text-decoration:none;margin-top:10px;">
-          📍 Open in Google Maps →
-        </a>
-        <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-top:14px;">
-          <h4 style="font-size:.88rem;font-weight:700;margin-bottom:12px;">📲 Follow Us</h4>
-          <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <span style="background:rgba(29,161,242,.1);border:1px solid rgba(29,161,242,.3);color:#1da1f2;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('fb')">Facebook</span>
-            <span id="ci-fb2-btn" style="display:none;background:rgba(29,161,242,.1);border:1px solid rgba(29,161,242,.3);color:#1da1f2;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('fb2')">Facebook 2</span>
-            <span style="background:rgba(225,48,108,.1);border:1px solid rgba(225,48,108,.3);color:#e1306c;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('ig')">Instagram</span>
-            <span id="ci-ig2-btn" style="display:none;background:rgba(225,48,108,.1);border:1px solid rgba(225,48,108,.3);color:#e1306c;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('ig2')">Instagram 2</span>
-            <span style="background:rgba(37,211,102,.1);border:1px solid rgba(37,211,102,.3);color:#25d366;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('wa')">WhatsApp</span>
-            <span style="background:rgba(255,0,0,.1);border:1px solid rgba(255,0,0,.3);color:#ff0000;padding:7px 14px;border-radius:18px;font-size:.8rem;font-weight:600;cursor:pointer;" onclick="openSocial('yt')">YouTube</span>
-          </div>
+        <div class="contact-item">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 6v6l4 2M12 22a10 10 0 100-20 10 10 0 000 20z"/></svg>
+          <div><div class="ci-label">Hours</div><div class="ci-value">Open daily · 11:00 AM – 11:00 PM</div></div>
+        </div>
+        <div class="contact-item">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+          <div><div class="ci-label">Reservations</div><div class="ci-value">Call ahead for tables & banquet enquiries</div></div>
+        </div>
+        <div class="contact-item">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+          <div><div class="ci-label">Banquet Bookings</div><div class="ci-value">Marriage Hall — enquire early for weekend dates</div></div>
         </div>
       </div>
 
-      <div class="contact-form">
-        <h3>📩 Send Us a Message</h3>
-        <div class="form-row">
-          <div class="form-group"><label>Your Name</label><input type="text" placeholder="e.g. Rahul Sharma" id="formName"/></div>
-          <div class="form-group"><label>Phone Number</label><input type="text" placeholder="98765-43210" id="formPhone"/></div>
-        </div>
-        <div class="form-group"><label>Email (optional)</label><input type="email" placeholder="your@email.com" id="formEmail"/></div>
-        <div class="form-group"><label>Which Brand Are You Interested In?</label>
-          <select id="formBrand">
-            <option value="">-- Select Brand --</option>
-            <option>Apple iPhone</option><option>Samsung Galaxy</option><option>Vivo</option>
-            <option>Oppo</option><option>Xiaomi / Redmi</option><option>Realme</option>
-            <option>Tecno</option><option>Infinix</option><option>Need Guidance</option>
-          </select>
-        </div>
-        <div class="form-group"><label>Your Budget</label>
-          <select id="formBudget">
-            <option value="">-- Select Budget --</option>
-            <option>₹8,000 – ₹15,000</option><option>₹15,000 – ₹30,000</option>
-            <option>₹30,000 – ₹60,000</option><option>₹60,000 – ₹1,00,000</option><option>₹1,00,000+</option>
-          </select>
-        </div>
-        <div class="form-group"><label>Message / Question</label><textarea placeholder="Type your question or requirement…" id="formMsg"></textarea></div>
-        <button class="submit-btn" onclick="sendMessage()">📤 Send Message</button>
+      <div class="map-frame reveal reveal-delay-2">
+        <iframe
+          src="https://www.google.com/maps?q=Shahi+Darbar,+NH+27,+Simrahi+Bazar,+Simarahi,+Bihar+852111&output=embed"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Shahi Darbar location map">
+        </iframe>
       </div>
     </div>
-  </section>
-</div>
+  </div>
+</section>
 
-<!-- REVIEWS PAGE -->
-<div class="page" id="page-reviews">
-  <section class="section">
-    <div class="section-header">
-      <div class="section-eyebrow">Customer Feedback</div>
-      <h2 class="section-title">Reviews & Ratings</h2>
-      <p class="section-sub">What our customers say about Aftab Azmi's Mobile Gallery</p>
-    </div>
-
-    <!-- Summary -->
-    <div class="reviews-summary" id="reviewsSummary">
-      <div class="reviews-avg" id="reviewsAvgNum">—</div>
-      <div class="reviews-avg-stars" id="reviewsAvgStars">⭐⭐⭐⭐⭐</div>
-      <div class="reviews-total" id="reviewsTotal">No reviews yet</div>
-    </div>
-
-    <!-- Add Review Box -->
-    <div class="add-review-box" id="addReviewBox">
-      <h3>✍️ Write Your Review</h3>
-      <div id="reviewLoginNote" class="review-login-note" style="display:none;">
-        👤 Please <span style="color:var(--accent2);cursor:pointer;font-weight:600;" onclick="openLogin()">Login</span> or <span style="color:var(--accent2);cursor:pointer;font-weight:600;" onclick="openRegister()">Register</span> to write a review.
-      </div>
-      <div id="reviewFormInner">
-        <div style="font-size:.85rem;color:var(--muted);margin-bottom:8px;">Select your rating:</div>
-        <div class="star-picker" id="starPicker">
-          <span onclick="setReviewStar(1)" data-star="1">☆</span>
-          <span onclick="setReviewStar(2)" data-star="2">☆</span>
-          <span onclick="setReviewStar(3)" data-star="3">☆</span>
-          <span onclick="setReviewStar(4)" data-star="4">☆</span>
-          <span onclick="setReviewStar(5)" data-star="5">☆</span>
-        </div>
-        <div class="auth-field" style="margin-bottom:14px;">
-          <label style="font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;display:block;margin-bottom:6px;">Apna Review Likhein</label>
-          <textarea id="reviewText" placeholder="Share your experience at our store…"
-            style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);
-            padding:12px 14px;border-radius:10px;font-size:.88rem;font-family:'Poppins',sans-serif;
-            resize:vertical;min-height:90px;outline:none;"></textarea>
-        </div>
-        <button class="review-submit-btn" onclick="submitReview()">⭐ Submit Review</button>
-      </div>
-    </div>
-
-    <!-- Reviews Grid -->
-    <div class="reviews-grid" id="reviewsGrid">
-      <div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted);">
-        <div style="font-size:3rem;margin-bottom:12px;">⭐</div>
-        <p>Abhi koi review nahi. Pehle review dein!</p>
-      </div>
-    </div>
-  </section>
-</div>
-
-<!-- FOOTER -->
 <footer>
-  <div class="footer-grid">
-    <div>
-      <div class="footer-logo">📱 <span id="footerStoreName">Mobile Gallery</span></div>
-      <p class="footer-desc" id="footerDesc">India's trusted mobile store – serving since 2015. All brands, best prices, 100% original. Karjain Road, Simrahi Bazar, Bihar.</p>
-      <div class="social-row">
-        <div class="social-btn" onclick="openSocial('fb')">📘</div>
-        <div class="social-btn" onclick="openSocial('ig')">📸</div>
-        <div class="social-btn" onclick="openSocial('wa')">💬</div>
-        <div class="social-btn" onclick="openSocial('yt')">🎥</div>
-      </div>
-    </div>
-    <div class="footer-col"><h4>Quick Links</h4><ul>
-      <li><a onclick="showPage('home')">Home</a></li>
-      <li><a onclick="showPage('phones')">All Phones</a></li>
-      <li><a onclick="showPage('brands')">Brands</a></li>
-      <li><a onclick="showPage('events')">🎉 Events</a></li>
-      <li><a onclick="showPage('about')">About Us</a></li>
-      <li><a onclick="showPage('contact')">Contact</a></li>
-      <li><a onclick="showPage('reviews')">⭐ Reviews</a></li>
-    </ul></div>
-    <div class="footer-col"><h4>Brands</h4><ul id="footerBrandsList"></ul></div>
-    <div class="footer-col"><h4>Services</h4><ul>
-      <li><a>Phone Exchange</a></li><li><a>EMI / Installment</a></li>
-      <li><a>Free Accessories</a></li><li><a>After-Sale Support</a></li><li><a>Data Transfer</a></li>
-    </ul></div>
+  <div class="footer-brand">Shahi&nbsp;Darbar</div>
+  <div class="footer-links">
+    <a href="#about">Heritage</a>
+    <a href="#menu">Menu</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#banquet">Banquets</a>
+    <a href="#contact">Contact</a>
   </div>
-  <div class="footer-bottom">
-    <div>© 2024 <span id="footerCopyName">Mobile Gallery</span> – All Rights Reserved</div>
-    <div style="font-size:.8rem;color:var(--muted);">Karjain Road, Simrahi Bazar, Bihar, India</div>
-  </div>
+  <div class="footer-fine">© 2026 Shahi Darbar Multi Cuisine Restaurant &amp; Hotel Shahi Palace, Simrahi Bazar · NH 27</div>
 </footer>
 
-<!-- ══ REGISTER MODAL ══ -->
-<div class="auth-overlay" id="registerOverlay">
-  <div class="auth-box">
-    <button class="auth-close" onclick="closeRegister()">✕</button>
-    <div class="auth-logo">📱</div>
-    <div class="auth-title">Create Account</div>
-    <div class="auth-sub">Register at Aftab Azmi's Mobile Gallery</div>
-    <div class="auth-error" id="regError"></div>
-    <div class="auth-field"><label>Full Name *</label><input type="text" id="reg-name" placeholder="Your full name"/></div>
-    <div class="auth-field"><label>Username *</label><input type="text" id="reg-username" placeholder="Unique username (no spaces)"/></div>
-    <div class="auth-field"><label>Email *</label><input type="email" id="reg-email" placeholder="your@email.com"/></div>
-    <div class="auth-field"><label>Phone Number *</label><input type="tel" id="reg-phone" placeholder="10-digit mobile number"/></div>
-    <div class="auth-field"><label>Password *</label><input type="password" id="reg-pass" placeholder="Min 6 characters"/></div>
-    <div class="auth-field"><label>Confirm Password *</label><input type="password" id="reg-pass2" placeholder="Confirm your password"/></div>
-    <button class="auth-btn" onclick="doRegister()" id="regBtn">✅ Create Account</button>
-    <div class="auth-spinner" id="regSpinner"></div>
-    <div class="auth-switch">Already have an account? <span onclick="switchToLogin()">Login</span></div>
-  </div>
-</div>
+<script>
+/* ---------------- header scroll state ---------------- */
+const header = document.getElementById('siteHeader');
+window.addEventListener('scroll', () => {
+  header.classList.toggle('scrolled', window.scrollY > 40);
+}, {passive:true});
 
-<!-- ══ LOGIN MODAL ══ -->
-<div class="auth-overlay" id="loginOverlay">
-  <div class="auth-box">
-    <button class="auth-close" onclick="closeLogin()">✕</button>
-    <div class="auth-logo">🔑</div>
-    <div class="auth-title">Welcome Back!</div>
-    <div class="auth-sub">Login to your account</div>
-    <div class="auth-error" id="loginError2"></div>
-    <div class="auth-field"><label>Email or Username *</label><input type="text" id="log-id" placeholder="Enter email or username"/></div>
-    <div class="auth-field"><label>Password *</label><input type="password" id="log-pass" placeholder="Your password"/></div>
-    <button class="auth-btn" onclick="doLogin()" id="loginBtn">🔑 Login</button>
-    <div class="auth-spinner" id="loginSpinner"></div>
-    <div class="auth-switch">Don't have an account? <span onclick="switchToRegister()">Register</span></div>
-  </div>
-</div>
+/* ---------------- close mobile nav on link click ---------------- */
+document.querySelectorAll('nav a').forEach(a => {
+  a.addEventListener('click', () => { document.getElementById('navToggle').checked = false; });
+});
 
-<!-- ══ PROFILE OVERLAY ══ -->
-<div class="profile-overlay" id="profileOverlay">
-  <div class="profile-box">
-    <button class="auth-close" onclick="closeProfile()">✕</button>
-    <div class="profile-avatar" id="profileAvatar">👤</div>
-    <div class="profile-username" id="profileUsername">Username</div>
-    <div class="profile-email" id="profileEmailDisplay">email@example.com</div>
+/* ---------------- scroll reveal ---------------- */
+const revealEls = document.querySelectorAll('.reveal');
+const archEls = document.querySelectorAll('[data-reveal-arch]');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    }
+  });
+}, {threshold:0.15, rootMargin:'0px 0px -8% 0px'});
+revealEls.forEach(el => io.observe(el));
 
-    <div class="profile-section-title">📋 Account Info</div>
-    <div class="profile-info-row"><span class="profile-info-label">Full Name</span><span class="profile-info-value" id="profileName">—</span></div>
-    <div class="profile-info-row"><span class="profile-info-label">Username</span><span class="profile-info-value" id="profileUsernameInfo">—</span></div>
-    <div class="profile-info-row"><span class="profile-info-label">Email</span><span class="profile-info-value" id="profileEmailInfo">—</span></div>
-    <div class="profile-info-row"><span class="profile-info-label">Phone</span><span class="profile-info-value" id="profilePhoneInfo">—</span></div>
-    <div class="profile-info-row"><span class="profile-info-label">Member Since</span><span class="profile-info-value" id="profileJoined">—</span></div>
+const archIo = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      e.target.classList.add('in');
+      archIo.unobserve(e.target);
+    }
+  });
+}, {threshold:0.4});
+archEls.forEach(el => archIo.observe(el));
 
-    <div class="profile-section-title">🔒 Change Password</div>
-    <div class="auth-error" id="pwdError"></div>
-    <div class="auth-field pwd-field"><label>Current Password</label><input type="password" id="pwd-current" placeholder="Current password"/></div>
-    <div class="auth-field pwd-field"><label>New Password</label><input type="password" id="pwd-new" placeholder="New password (min 6 chars)"/></div>
-    <div class="auth-field pwd-field"><label>Confirm New Password</label><input type="password" id="pwd-confirm" placeholder="Confirm new password"/></div>
-    <button class="profile-btn profile-btn-primary" onclick="changePassword()" style="margin-top:4px;">🔒 Change Password</button>
-    <button class="profile-btn profile-btn-danger" onclick="logoutUser()" style="margin-top:8px;">🚪 Logout</button>
-  </div>
-</div>
+/* ---------------- testimonial auto-scroll on mobile touch is native; add subtle drag on desktop ---------------- */
 
-<!-- PHONE DETAIL OVERLAY -->
-<div id="phoneDetailOverlay">
-  <div class="pd-container">
-    <div class="pd-back" onclick="closePhoneDetail()">← Back to Phones</div>
-    <div class="pd-body">
-      <div class="pd-img-col">
-        <div class="pd-img-section" id="pdImgSection">
-          <span class="pd-img-emoji" id="pdEmoji">📱</span>
-          <span class="pd-stock-badge" id="pdStockBadge" style="display:none;"></span>
-          <span class="pd-badge-overlay phone-badge" id="pdBadgeOverlay" style="display:none;"></span>
-        </div>
-        <div class="pd-thumb-row" id="pdThumbRow" style="display:none;"></div>
-      </div>
-      <div class="pd-info">
-        <div class="pd-brand-tag" id="pdBrand">Brand</div>
-        <div class="pd-name" id="pdName">Phone Name</div>
-        <div class="pd-price-row">
-          <div class="pd-price" id="pdPrice">₹0</div>
-          <span class="pd-price-tag">Best Price Guarantee ✓</span>
-        </div>
-        <div class="pd-specs-box">
-          <h4>Key Specifications</h4>
-          <div id="pdSpecsList"></div>
-        </div>
-        <div class="pd-features">
-          <span class="pd-feat-pill">✅ 100% Original</span>
-          <span class="pd-feat-pill">📦 Box Pack</span>
-          <span class="pd-feat-pill">🔧 Warranty</span>
-          <span class="pd-feat-pill">💳 EMI Available</span>
-          <span class="pd-feat-pill">📲 Free Setup</span>
-        </div>
-        <div class="pd-actions" style="margin-top:20px;">
-          <button class="pd-btn-wa" onclick="inquireWhatsApp()">💬 WhatsApp Inquiry</button>
-          <button class="pd-btn-call" onclick="callStore()">📞 Call Store</button>
-          <button class="pd-btn-preorder" id="pdPreorderBtn" onclick="openPreorder()" style="display:none;">🎯 Pre-Order Now (Pay Advance)</button>
-        </div>
-        <div style="margin-top:14px;background:rgba(108,63,255,.08);border:1px solid rgba(108,63,255,.2);
-          border-radius:10px;padding:12px 14px;font-size:.8rem;color:var(--muted);line-height:1.6;">
-          📍 <strong style="color:var(--text);">Aftab Azmi's Mobile Gallery</strong> — Karjain Road, Simrahi Bazar, Bihar 852111
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+/* ---------------- Three.js ambient particle / light-streak hero ---------------- */
+(function(){
+  const canvas = document.getElementById('heroCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, dpr;
+  let particles = [];
+  let streaks = [];
 
-<!-- ══ PRE-ORDER MODAL — STEP 1: Customer Details + % ══ -->
-<div class="preorder-overlay" id="preorderOverlay">
-  <div class="preorder-box">
-    <button class="auth-close" onclick="closePreorder()">✕</button>
-    <div class="auth-logo">🎯</div>
-    <div class="auth-title">Pre-Order This Phone</div>
-    <div class="auth-sub">Reserve now by paying a small advance</div>
+  function resize(){
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    w = canvas.clientWidth = canvas.offsetWidth;
+    h = canvas.clientHeight = canvas.offsetHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
 
-    <div class="preorder-product-summary" id="preorderProductSummary"></div>
+  function init(){
+    resize();
+    particles = [];
+    const count = Math.min(70, Math.floor(w/16));
+    for(let i=0;i<count;i++){
+      particles.push({
+        x: Math.random()*w,
+        y: Math.random()*h,
+        r: Math.random()*1.6 + 0.4,
+        vy: -(Math.random()*0.35 + 0.08),
+        vx: (Math.random()-0.5)*0.15,
+        alpha: Math.random()*0.5 + 0.15,
+        hue: Math.random() > 0.5 ? 'gold' : 'blue'
+      });
+    }
+    streaks = [];
+    for(let i=0;i<5;i++){
+      streaks.push({
+        y: h * (0.15 + i*0.15) + (Math.random()*40-20),
+        x: Math.random()*w,
+        len: w*0.18 + Math.random()*w*0.12,
+        speed: 0.25 + Math.random()*0.35,
+        alpha: 0.05 + Math.random()*0.06
+      });
+    }
+  }
 
-    <div style="font-size:.78rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;">Choose Down Payment</div>
-    <div class="preorder-pct-row" id="preorderPctRow"></div>
+  function draw(){
+    ctx.clearRect(0,0,w,h);
 
-    <div class="preorder-amount-box">
-      <div class="amt" id="preorderAmountDisplay">₹0</div>
-      <div class="lbl">Advance amount to pay now</div>
-    </div>
+    // ambient light streaks (echoing the neon ceiling lines)
+    streaks.forEach(s => {
+      const grad = ctx.createLinearGradient(s.x, s.y, s.x + s.len, s.y);
+      grad.addColorStop(0, 'rgba(212,175,55,0)');
+      grad.addColorStop(0.5, `rgba(212,175,55,${s.alpha})`);
+      grad.addColorStop(1, 'rgba(212,175,55,0)');
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(s.x + s.len, s.y);
+      ctx.stroke();
+      s.x += s.speed;
+      if(s.x > w) s.x = -s.len;
+    });
 
-    <div class="auth-error" id="preorderError"></div>
-    <div class="auth-field"><label>Full Name *</label><input type="text" id="po-name" placeholder="Your full name"/></div>
-    <div class="auth-field"><label>Mobile Number *</label><input type="tel" id="po-phone" placeholder="10-digit mobile number"/></div>
-    <div class="auth-field"><label>Email (optional)</label><input type="email" id="po-email" placeholder="your@email.com"/></div>
+    // floating embers / particles
+    particles.forEach(p => {
+      const color = p.hue === 'gold' ? `rgba(233,205,122,${p.alpha})` : `rgba(120,150,230,${p.alpha*0.7})`;
+      ctx.beginPath();
+      ctx.fillStyle = color;
+      ctx.shadowColor = color;
+      ctx.shadowBlur = 6;
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
 
-    <button class="auth-btn" onclick="proceedToPayment()">Continue to Payment →</button>
-  </div>
-</div>
+      p.y += p.vy;
+      p.x += p.vx;
+      if(p.y < -10){ p.y = h+10; p.x = Math.random()*w; }
+    });
 
-<!-- ══ PAYMENT PAGE — STEP 2: Select Method + QR ══ -->
-<div class="payment-overlay" id="paymentOverlay">
-  <div class="payment-box" id="paymentBoxContent">
-    <button class="auth-close" onclick="closePayment()">✕</button>
-    <div style="font-size:.8rem;color:var(--muted);">Pay Advance Amount</div>
-    <div class="payment-amount-display" id="paymentAmountDisplay">₹0</div>
-    <div style="font-size:.8rem;color:var(--muted);margin-bottom:6px;" id="paymentForProduct"></div>
+    requestAnimationFrame(draw);
+  }
 
-    <div class="payment-method-grid" id="paymentMethodGrid"></div>
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(init, 200);
+  });
 
-    <div class="payment-qr-box" id="paymentQrBox">
-      <img id="paymentQrImg" alt="UPI QR Code"/>
-      <div class="payment-upi-id" id="paymentUpiIdDisplay"></div>
-    </div>
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  init();
+  if(!reduceMotion){
+    requestAnimationFrame(draw);
+  } else {
+    draw();
+  }
+})();
 
-    <div id="paypalLinkBox" style="display:none;margin:16px 0;">
-      <a id="paypalLinkAnchor" href="#" target="_blank" class="auth-btn" style="display:inline-block;text-decoration:none;">Open PayPal →</a>
-    </div>
+/* ---------------- subtle parallax on hero bg ---------------- */
+const heroBg = document.querySelector('.hero-bg-img');
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  if(y < window.innerHeight){
+    heroBg.style.transform = `translateY(${y*0.25}px)`;
+  }
+}, {passive:true});
+</script>
 
-    <div class="payment-steps" id="paymentStepsBox" style="display:none;">
-      <strong style="color:var(--text);">How to pay:</strong><br/>
-      1. Open your UPI app (the one you selected)<br/>
-      2. Scan the QR code above<br/>
-      3. Enter the exact amount shown<br/>
-      4. Complete the payment<br/>
-      5. Tap "I've Paid" below to confirm your order
-    </div>
-
-    <button class="payment-confirm-btn" id="paymentConfirmBtn" onclick="confirmPaymentDone()" style="display:none;">✅ I've Paid — Confirm Order</button>
-    <div class="payment-back-link" onclick="backToPreorder()">← Back to order details</div>
-  </div>
-</div>
-
-<!-- ══ PAYMENT SUCCESS ══ -->
-<div class="payment-overlay" id="paymentSuccessOverlay">
-  <div class="payment-box">
-    <div class="payment-success-icon">🎉</div>
-    <div class="auth-title">Order Placed Successfully!</div>
-    <p style="font-size:.85rem;color:var(--muted);margin:10px 0 4px;line-height:1.6;">
-      Your pre-order has been recorded. Our team will verify your payment and contact you within a few hours to confirm.
-    </p>
-    <p style="font-size:.8rem;color:var(--accent2);font-weight:600;margin-bottom:18px;" id="orderRefDisplay"></p>
-    <button class="auth-btn" onclick="closeAllPaymentModals()">Done</button>
-  </div>
-</div>
-
-<!-- GADGET DETAIL OVERLAY -->
-<div id="gadgetDetailOverlay">
-  <div class="pd-container">
-    <div class="pd-back" onclick="closeGadgetDetail()">← Back to Gadgets</div>
-    <div class="pd-body">
-      <div class="pd-img-col">
-        <div class="pd-img-section" id="gdImgSection">
-          <span class="pd-img-emoji" id="gdEmoji">📦</span>
-          <span class="pd-stock-badge" id="gdStockBadge" style="display:none;"></span>
-          <span class="pd-badge-overlay phone-badge" id="gdBadgeOverlay" style="display:none;"></span>
-        </div>
-      </div>
-      <div class="pd-info">
-        <div class="pd-brand-tag" id="gdCat">Category</div>
-        <div class="pd-name" id="gdName">Product Name</div>
-        <div class="pd-price-row">
-          <div class="pd-price" id="gdPrice">₹0</div>
-          <span class="pd-price-tag">Best Price Guarantee ✓</span>
-        </div>
-        <div class="pd-specs-box">
-          <h4>Product Description</h4>
-          <div id="gdDescBox" style="font-size:.85rem;color:var(--text);line-height:1.7;"></div>
-        </div>
-        <div class="pd-features">
-          <span class="pd-feat-pill">✅ 100% Original</span>
-          <span class="pd-feat-pill">📦 Sealed Pack</span>
-          <span class="pd-feat-pill">🔧 Warranty</span>
-        </div>
-        <div class="pd-actions" style="margin-top:20px;">
-          <button class="pd-btn-wa" onclick="inquireGadgetWhatsApp()">💬 WhatsApp Inquiry</button>
-          <button class="pd-btn-call" onclick="callStore()">📞 Call Store</button>
-        </div>
-        <div style="margin-top:14px;background:rgba(108,63,255,.08);border:1px solid rgba(108,63,255,.2);
-          border-radius:10px;padding:12px 14px;font-size:.8rem;color:var(--muted);line-height:1.6;">
-          📍 <strong style="color:var(--text);">Aftab Azmi's Mobile Gallery</strong> — Karjain Road, Simrahi Bazar, Bihar 852111
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- GALLERY LIGHTBOX -->
-<div id="galleryLightbox">
-  <button class="lb-close" onclick="closeLightbox()">✕</button>
-  <img class="lb-img" id="lbImage" src="" alt=""/>
-  <div class="lb-caption" id="lbCaption"></div>
-  <div class="lb-sub" id="lbSub"></div>
-</div>
-
-<div id="toast"></div>
-
-<!-- ══════════════════════════════════════════
-     MASTER SCRIPT
-══════════════════════════════════════════ -->
-
-<!-- ══════════════════════════════════════════
-     SCRIPTS — load order matters! Each file
-     depends on globals/functions defined in
-     the files loaded before it.
-══════════════════════════════════════════ -->
-<script src="js/data.js"></script>
-<script src="js/render.js"></script>
-<script src="js/auth.js"></script>
-<script src="js/core.js"></script>
-<script src="js/admin.js"></script>
-<script src="js/payments.js"></script>
-<script src="js/firebase.js"></script>
 </body>
 </html>
