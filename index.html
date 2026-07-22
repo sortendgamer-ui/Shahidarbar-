@@ -521,6 +521,10 @@
   .contact-item .ci-value{
     font-family:'Cormorant Garamond', serif; font-size:1.2rem; color:var(--ivory);
   }
+  .contact-item .ci-value a{
+    color:var(--ivory); border-bottom:1px solid transparent; transition:color .3s ease, border-color .3s ease;
+  }
+  .contact-item .ci-value a:hover{ color:var(--gold-soft); border-color:var(--gold-soft); }
   .map-frame{
     border-radius:3px; overflow:hidden; border:1px solid var(--surface-line);
     aspect-ratio:4/3;
@@ -707,19 +711,23 @@
 
     <div class="menu-grid">
       <div class="menu-col reveal reveal-delay-1">
-        <div class="menu-row"><div><div class="m-name">Shahi Paneer Darbar</div><div class="m-desc">Cottage cheese in a royal cashew-tomato gravy</div></div><div class="m-price">₹ 260</div></div>
-        <div class="menu-row"><div><div class="m-name">Butter Chicken</div><div class="m-desc">Tandoor-roasted chicken, velvet tomato butter sauce</div></div><div class="m-price">₹ 320</div></div>
-        <div class="menu-row"><div><div class="m-name">Dal Makhani</div><div class="m-desc">Slow-simmered black lentils, cream, smoked butter</div></div><div class="m-price">₹ 210</div></div>
-        <div class="menu-row"><div><div class="m-name">Tandoori Platter</div><div class="m-desc">Chef's selection of clay-oven kebabs</div></div><div class="m-price">₹ 380</div></div>
+        <div class="menu-row"><div><div class="m-name">Shahi Paneer (Sweet)</div><div class="m-desc">Our signature royal cottage cheese preparation</div></div></div>
+        <div class="menu-row"><div><div class="m-name">Paneer Handi</div><div class="m-desc">Cottage cheese slow-cooked in a traditional handi</div></div></div>
+        <div class="menu-row"><div><div class="m-name">Chicken Butter Masala</div><div class="m-desc">Tandoor-roasted chicken in velvet tomato butter gravy</div></div></div>
+        <div class="menu-row"><div><div class="m-name">Shahi Chicken</div><div class="m-desc">The house special, rich and royally spiced</div></div></div>
+        <div class="menu-row"><div><div class="m-name">Chicken Kadhai</div><div class="m-desc">Wok-seared chicken with bell peppers, kadhai masala</div></div></div>
+        <div class="menu-row"><div><div class="m-name">Mutton Curry</div><div class="m-desc">Slow-braised mutton in a classic desi curry</div></div></div>
       </div>
       <div class="menu-col reveal reveal-delay-2">
-        <div class="menu-row"><div><div class="m-name">Chicken Biryani</div><div class="m-desc">Long-grain basmati, layered spice, saffron</div></div><div class="m-price">₹ 290</div></div>
-        <div class="menu-row"><div><div class="m-name">Darbar Chowmein</div><div class="m-desc">Wok-tossed noodles, garden vegetables</div></div><div class="m-price">₹ 180</div></div>
-        <div class="menu-row"><div><div class="m-name">Chilli Paneer</div><div class="m-desc">Indo-Chinese classic, crisp and glazed</div></div><div class="m-price">₹ 230</div></div>
-        <div class="menu-row"><div><div class="m-name">Royal Thali</div><div class="m-desc">A complete banquet on a single plate</div></div><div class="m-price">₹ 340</div></div>
+        <div class="menu-row"><div><div class="m-name">Chicken 65</div><div class="m-desc">Fiery, deep-fried South Indian classic</div></div></div>
+        <div class="menu-row"><div><div class="m-name">Chicken Lolipop</div><div class="m-desc">Frenched chicken wings, tossed in signature spice</div></div></div>
+        <div class="menu-row"><div><div class="m-name">Paneer Chilli</div><div class="m-desc">Indo-Chinese classic, crisp and glazed</div></div></div>
+        <div class="menu-row"><div><div class="m-name">Veg Hakka Noodles</div><div class="m-desc">Wok-tossed noodles, garden vegetables</div></div></div>
+        <div class="menu-row"><div><div class="m-name">Chicken Hyderabadi Biryani</div><div class="m-desc">Long-grain basmati, layered spice, saffron</div></div></div>
+        <div class="menu-row"><div><div class="m-name">Shahi Darbar Special Thali</div><div class="m-desc">A complete royal banquet on a single plate</div></div></div>
       </div>
     </div>
-    <p class="menu-note reveal">Full à la carte and banquet menus available on request · Prices are indicative</p>
+    <p class="menu-note reveal">Full à la carte and banquet menus available on request · Free home delivery</p>
   </div>
 </section>
 
@@ -779,7 +787,7 @@
       <div class="reveal reveal-delay-1">
         <div class="contact-item">
           <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M21 10c0 7-9 12-9 12S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <div><div class="ci-label">Address</div><div class="ci-value">Shahi Darbar, NH 27, Simrahi Bazar, Simarahi, Bihar 852111</div></div>
+          <div><div class="ci-label">Address</div><div class="ci-value">Simrahi Partabganj Road, NH 27, Shahi Darbar, Simrahi Bazar, Bihar</div></div>
         </div>
         <div class="contact-item">
           <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 6v6l4 2M12 22a10 10 0 100-20 10 10 0 000 20z"/></svg>
@@ -787,11 +795,23 @@
         </div>
         <div class="contact-item">
           <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.362 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-          <div><div class="ci-label">Reservations</div><div class="ci-value">Call ahead for tables & banquet enquiries</div></div>
+          <div><div class="ci-label">Call Us</div><div class="ci-value"><a href="tel:+919162465392">9162465392</a> &nbsp;/&nbsp; <a href="tel:+919135710711">9135710711</a></div></div>
+        </div>
+        <div class="contact-item">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+          <div><div class="ci-label">WhatsApp</div><div class="ci-value"><a href="https://wa.me/919102209387" target="_blank" rel="noopener">9102209387</a></div></div>
+        </div>
+        <div class="contact-item">
+          <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 4h16v16H4z" style="display:none"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+          <div><div class="ci-label">Email</div><div class="ci-value"><a href="mailto:shahidarbar47@gmail.com">shahidarbar47@gmail.com</a></div></div>
         </div>
         <div class="contact-item">
           <svg class="ci-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-          <div><div class="ci-label">Banquet Bookings</div><div class="ci-value">Marriage Hall — enquire early for weekend dates</div></div>
+          <div><div class="ci-label">Follow Us</div><div class="ci-value">
+            <a href="https://www.facebook.com/share/1JG5UgKsSw/?mibextid=wwXIfr" target="_blank" rel="noopener">Facebook</a>
+            &nbsp;/&nbsp;
+            <a href="https://www.instagram.com/shahi_darbar_001?igsh=Z3QwdnhzNm9wbG5k" target="_blank" rel="noopener">Instagram</a>
+          </div></div>
         </div>
       </div>
 
@@ -816,7 +836,13 @@
     <a href="#banquet">Banquets</a>
     <a href="#contact">Contact</a>
   </div>
-  <div class="footer-fine">© 2026 Shahi Darbar Multi Cuisine Restaurant &amp; Hotel Shahi Palace, Simrahi Bazar · NH 27</div>
+  <div class="footer-links">
+    <a href="mailto:shahidarbar47@gmail.com">Email</a>
+    <a href="https://wa.me/919102209387" target="_blank" rel="noopener">WhatsApp</a>
+    <a href="https://www.facebook.com/share/1JG5UgKsSw/?mibextid=wwXIfr" target="_blank" rel="noopener">Facebook</a>
+    <a href="https://www.instagram.com/shahi_darbar_001?igsh=Z3QwdnhzNm9wbG5k" target="_blank" rel="noopener">Instagram</a>
+  </div>
+  <div class="footer-fine">© 2026 Shahi Darbar Multi Cuisine Restaurant &amp; Hotel Shahi Palace, Simrahi Bazar · NH 27 · 9162465392 / 9135710711</div>
 </footer>
 
 <script>
