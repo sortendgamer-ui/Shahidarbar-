@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login / Register — Shahi Darbar</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Marcellus&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="vignette"></div>
+
+<div class="auth-shell">
+  <div class="auth-visual">
+    <img src="images/lounge-blue-crop.jpg" alt="Shahi Darbar lounge interior">
+    <div class="auth-visual-content">
+      <h2>Join the <em style="font-style:italic; color:var(--gold-soft);">Darbar</em> circle</h2>
+      <p>Create an account to leave reviews, save your favourite dishes, and stay close to Shahi Darbar's world.</p>
+    </div>
+  </div>
+
+  <div class="auth-panel">
+    <div class="auth-card">
+      <a href="index.html" class="auth-back">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Back to Home
+      </a>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Login</button>
+        <button class="auth-tab" data-tab="register">Register</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <div class="auth-form active" id="loginFormWrap">
+        <h1>Welcome Back</h1>
+        <p class="sub">Sign in to leave a review or manage your account.</p>
+        <div class="form-msg" id="loginMsg"></div>
+        <form id="loginForm">
+          <div class="field">
+            <label for="loginUsername">Username</label>
+            <input type="text" id="loginUsername" autocomplete="username" placeholder="your_username" required>
+          </div>
+          <div class="field">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" autocomplete="current-password" placeholder="••••••••" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="loginSubmitBtn">Sign In</button>
+        </form>
+      </div>
+
+      <!-- REGISTER FORM -->
+      <div class="auth-form" id="registerFormWrap">
+        <h1>Create Account</h1>
+        <p class="sub">Usernames are unique — pick one that's yours alone.</p>
+        <div class="form-msg" id="registerMsg"></div>
+        <form id="registerForm">
+          <div class="field">
+            <label for="registerUsername">Username</label>
+            <input type="text" id="registerUsername" autocomplete="username" placeholder="3-20 characters, letters/numbers/_" required>
+          </div>
+          <div class="field">
+            <label for="registerPassword">Password</label>
+            <input type="password" id="registerPassword" autocomplete="new-password" placeholder="At least 6 characters" required>
+          </div>
+          <div class="field">
+            <label for="registerConfirm">Confirm Password</label>
+            <input type="password" id="registerConfirm" autocomplete="new-password" placeholder="Re-enter your password" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="registerSubmitBtn">Create Account</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toastStack"></div>
+
+<script type="module">
+  import { registerUser, loginUser, showToast, waitForAuth } from "./js/auth.js";
+
+  // If already logged in, redirect immediately
+  waitForAuth().then(user => {
+    if (user) {
+      const params = new URLSearchParams(window.location.search);
+      window.location.href = params.get("redirect") || "index.html";
+    }
+  });
+
+  /* -------- tab switching -------- */
+  const tabs = document.querySelectorAll(".auth-tab");
+  const forms = { login: document.getElementById("loginFormWrap"), register: document.getElementById("registerFormWrap") };
+  tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      tabs.forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+      Object.values(forms).forEach(f => f.classList.remove("active"));
+      forms[tab.dataset.tab].classList.add("active");
+    });
+  });
+
+  // Deep-link support: login.html?tab=register
+  const initialTab = new URLSearchParams(window.location.search).get("tab");
+  if (initialTab === "register") {
+    document.querySelector('[data-tab="register"]').click();
+  }
+
+  function showMsg(el, msg, type) {
+    el.textContent = msg;
+    el.className = `form-msg show ${type}`;
+  }
+  function redirectAfterAuth() {
+    const params = new URLSearchParams(window.location.search);
+    const target = params.get("redirect") || "index.html";
+    setTimeout(() => { window.location.href = target; }, 600);
+  }
+
+  /* -------- login submit -------- */
+  const loginForm = document.getElementById("loginForm");
+  const loginMsg = document.getElementById("loginMsg");
+  const loginBtn = document.getElementById("loginSubmitBtn");
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    loginMsg.classList.remove("show");
+    loginBtn.disabled = true; loginBtn.textContent = "Signing in…";
+    try {
+      const username = document.getElementById("loginUsername").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      await loginUser(username, password);
+      showMsg(loginMsg, "Welcome back! Redirecting…", "success");
+      showToast("Logged in successfully.", "success");
+      redirectAfterAuth();
+    } catch (err) {
+      showMsg(loginMsg, err.message || "Login failed.", "error");
+    } finally {
+      loginBtn.disabled = false; loginBtn.textContent = "Sign In";
+    }
+  });
+
+  /* -------- register submit -------- */
+  const registerForm = document.getElementById("registerForm");
+  const registerMsg = document.getElementById("registerMsg");
+  const registerBtn = document.getElementById("registerSubmitBtn");
+  registerForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    registerMsg.classList.remove("show");
+
+    const username = document.getElementById("registerUsername").value.trim();
+    const password = document.getElementById("registerPassword").value;
+    const confirm = document.getElementById("registerConfirm").value;
+
+    if (password !== confirm) {
+      showMsg(registerMsg, "Passwords do not match.", "error");
+      return;
+    }
+
+    registerBtn.disabled = true; registerBtn.textContent = "Creating account…";
+    try {
+      await registerUser(username, password);
+      showMsg(registerMsg, "Account created! Redirecting…", "success");
+      showToast(`Welcome, ${username}!`, "success");
+      redirectAfterAuth();
+    } catch (err) {
+      showMsg(registerMsg, err.message || "Registration failed.", "error");
+    } finally {
+      registerBtn.disabled = false; registerBtn.textContent = "Create Account";
+    }
+  });
+</script>
+
+</body>
+</html>
