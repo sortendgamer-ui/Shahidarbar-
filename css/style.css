@@ -944,3 +944,18 @@
 @media (max-width:600px){
   .review-summary{ padding:1.8rem; gap:1.6rem; }
 }
+
+/* =========================================================
+   SUBTLE ADMIN ACCESS ICON (next to Login/Register)
+   Intentionally low-key: small, faint, no label — easy to miss
+   unless someone knows to look for it.
+   ========================================================= */
+.admin-access-subtle{
+  display:flex; align-items:center; justify-content:center;
+  width:30px; height:30px; border-radius:50%;
+  color:var(--ivory-faint); opacity:0.28;
+  transition:opacity .4s ease, color .4s ease, background .4s ease;
+  flex-shrink:0;
+}
+.admin-access-subtle svg{ width:14px; height:14px; }
+.admin-access-subtle:hover{ opacity:1; color:var(--gold-soft); background:rgba(212,175,55,0.08); }

@@ -33,6 +33,14 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
       Gallery
     </div>
+    <div class="admin-nav-item" data-view="viewMenu">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V5a2 2 0 012-2h12a2 2 0 012 2v14l-3-2-3 2-3-2-3 2-3-2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="16" y2="11"/></svg>
+      Menu
+    </div>
+    <div class="admin-nav-item" data-view="viewContent">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Site Content
+    </div>
     <div class="admin-nav-item" data-view="viewReviews">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>
       Reviews
@@ -99,6 +107,103 @@
         <thead><tr><th>Preview</th><th>Caption</th><th>Category</th><th>Actions</th></tr></thead>
         <tbody><tr><td colspan="4" class="dt-empty">Loading…</td></tr></tbody>
       </table>
+    </div>
+
+    <!-- MENU -->
+    <div class="admin-panel-view" id="viewMenu">
+      <div class="admin-head"><h2>Manage Menu</h2></div>
+
+      <div class="admin-form-card">
+        <h3 id="menuFormTitle">Add New Menu Item</h3>
+        <form id="menuForm">
+          <input type="hidden" id="menuEditId">
+          <div class="form-row-2">
+            <div class="field">
+              <label for="menuName">Dish Name</label>
+              <input type="text" id="menuName" placeholder="e.g. Shahi Paneer" required>
+            </div>
+            <div class="field">
+              <label for="menuOrder">Display Order</label>
+              <input type="number" id="menuOrder" placeholder="e.g. 1" value="1">
+            </div>
+          </div>
+          <div class="field">
+            <label for="menuDesc">Short Description</label>
+            <input type="text" id="menuDesc" placeholder="e.g. Cottage cheese in a royal cashew-tomato gravy">
+          </div>
+          <div style="display:flex; gap:1rem;">
+            <button type="submit" class="btn btn-primary">Save Item</button>
+            <button type="button" class="btn-ghost" id="menuCancelEdit" style="display:none;">Cancel Edit</button>
+          </div>
+        </form>
+      </div>
+
+      <table class="data-table" id="menuTable">
+        <thead><tr><th>Dish</th><th>Description</th><th>Order</th><th>Actions</th></tr></thead>
+        <tbody><tr><td colspan="4" class="dt-empty">Loading…</td></tr></tbody>
+      </table>
+      <p style="color:var(--ivory-faint); font-size:0.8rem; margin-top:1rem; font-family:'Cormorant Garamond',serif; font-style:italic;">
+        Once you add at least one item here, it replaces the homepage's default menu list automatically.
+      </p>
+    </div>
+
+    <!-- SITE CONTENT -->
+    <div class="admin-panel-view" id="viewContent">
+      <div class="admin-head"><h2>Edit Site Content</h2></div>
+
+      <div class="admin-form-card">
+        <h3>Homepage Text</h3>
+        <form id="contentForm">
+          <div class="field">
+            <label for="cHeroSubtitle">Hero Subtitle</label>
+            <input type="text" id="cHeroSubtitle" placeholder="Multi-cuisine dining, banquets, and hospitality…">
+          </div>
+          <div class="field">
+            <label for="cAboutPara1">About — Paragraph 1</label>
+            <textarea id="cAboutPara1" rows="3"></textarea>
+          </div>
+          <div class="field">
+            <label for="cAboutPara2">About — Paragraph 2</label>
+            <textarea id="cAboutPara2" rows="3"></textarea>
+          </div>
+          <div class="field">
+            <label for="cBanquetText">Banquet Section Text</label>
+            <textarea id="cBanquetText" rows="3"></textarea>
+          </div>
+
+          <h3 style="margin-top:2rem;">Contact Details</h3>
+          <div class="field">
+            <label for="cAddress">Address</label>
+            <input type="text" id="cAddress">
+          </div>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="cHours">Hours</label>
+              <input type="text" id="cHours" placeholder="Open daily · 11:00 AM – 11:00 PM">
+            </div>
+            <div class="field">
+              <label for="cEmail">Email</label>
+              <input type="email" id="cEmail">
+            </div>
+          </div>
+          <div class="form-row-2">
+            <div class="field">
+              <label for="cPhone1">Phone 1 (10 digits)</label>
+              <input type="text" id="cPhone1" placeholder="9162465392">
+            </div>
+            <div class="field">
+              <label for="cPhone2">Phone 2 (10 digits)</label>
+              <input type="text" id="cPhone2" placeholder="9135710711">
+            </div>
+          </div>
+          <div class="field">
+            <label for="cWhatsapp">WhatsApp Number (10 digits)</label>
+            <input type="text" id="cWhatsapp" placeholder="9102209387">
+          </div>
+
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </form>
+      </div>
     </div>
 
     <!-- REVIEWS -->

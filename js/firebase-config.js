@@ -31,3 +31,11 @@ export const firebaseConfig = {
    email under the hood, so we build one automatically). You don't
    need to change this. */
 export const AUTH_EMAIL_DOMAIN = "shahidarbar.app";
+
+/* The ONE email allowed to access the Admin Panel. Only someone who
+   knows this exact email + its password can ever reach admin.html —
+   regular site accounts (used for posting reviews) can never become
+   admins, no matter what. Change this if you want a different admin
+   email, then use that new email the first time you open admin-login.html
+   (it self-creates the account on first successful login). */
+export const ADMIN_EMAIL = "shahidarbar@gmail.com";

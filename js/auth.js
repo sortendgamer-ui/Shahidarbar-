@@ -1,5 +1,5 @@
 import { auth, db } from "./firebase-init.js";
-import { AUTH_EMAIL_DOMAIN } from "./firebase-config.js";
+import { AUTH_EMAIL_DOMAIN, ADMIN_EMAIL } from "./firebase-config.js";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -100,6 +100,57 @@ export async function logoutUser() {
   await signOut(auth);
 }
 
+/* ============================= ADMIN LOGIN (separate from regular accounts) =============================
+   Only the exact ADMIN_EMAIL (set in firebase-config.js) can ever log in here.
+   The very first successful attempt with the correct email silently creates
+   that Firebase account behind the scenes and marks it as admin — after that,
+   it behaves like a normal login. No one else can ever become admin this way,
+   because the email is hard-checked before anything touches Firebase. */
+export async function loginAdmin(email, password) {
+  const typed = (email || "").trim().toLowerCase();
+  if (typed !== ADMIN_EMAIL.toLowerCase()) {
+    throw new Error("Invalid admin credentials.");
+  }
+  if (!password) throw new Error("Enter the admin password.");
+
+  let user;
+  try {
+    const cred = await signInWithEmailAndPassword(auth, ADMIN_EMAIL, password);
+    user = cred.user;
+  } catch (err) {
+    if (err.code === "auth/user-not-found" || err.code === "auth/invalid-credential") {
+      // First-ever admin login: create the account now with the password just typed.
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, password);
+        user = cred.user;
+        await updateProfile(user, { displayName: "Admin" });
+      } catch (createErr) {
+        if (createErr.code === "auth/email-already-in-use") {
+          throw new Error("Invalid admin credentials.");
+        }
+        if (createErr.code === "auth/weak-password") {
+          throw new Error("Password must be at least 6 characters.");
+        }
+        throw new Error(createErr.message || "Admin login failed.");
+      }
+    } else {
+      throw new Error("Invalid admin credentials.");
+    }
+  }
+
+  // Make sure the Firestore profile reflects admin status (idempotent).
+  await setDoc(doc(db, "users", user.uid), {
+    username: "Admin",
+    usernameLower: "admin",
+    isAdmin: true,
+    reviewCount: 0,
+    createdAt: serverTimestamp()
+  }, { merge: true });
+
+  clearUserDocCache(user.uid);
+  return user;
+}
+
 /* ============================= USER DOC ============================= */
 const userDocCache = new Map();
 export async function getUserDoc(uid, { force = false } = {}) {
@@ -134,7 +185,7 @@ export function initNavAuth() {
 
     const data = await getUserDoc(user.uid, { force: true });
     const displayName = data?.username || user.displayName || "Guest";
-    const isAdmin = !!data?.isAdmin;
+    const isAdmin = (user.email || "").toLowerCase() === ADMIN_EMAIL.toLowerCase();
     document.body.classList.add("is-authed");
     document.body.classList.toggle("is-admin", isAdmin);
 
@@ -194,16 +245,18 @@ export async function requireLogin(redirectPage) {
   return user;
 }
 
-/** Redirects to login (then shows access-denied) if not an admin. */
+/** Redirects to admin-login.html if not signed in as the admin account.
+    Admin status is decided ONLY by matching ADMIN_EMAIL — never by a
+    Firestore flag alone — so a regular account can never pass this check. */
 export async function requireAdmin() {
   const user = await waitForAuth();
-  if (!user) {
-    window.location.href = "login.html?redirect=admin.html";
-    return null;
-  }
-  const data = await getUserDoc(user.uid, { force: true });
-  if (!data?.isAdmin) {
+  if (!user || (user.email || "").toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
+    if (!user) {
+      window.location.href = "admin-login.html";
+      return null;
+    }
     return { user, isAdmin: false };
   }
+  const data = await getUserDoc(user.uid, { force: true });
   return { user, isAdmin: true, data };
 }

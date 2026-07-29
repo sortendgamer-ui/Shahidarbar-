@@ -2,7 +2,7 @@ import { db } from "./firebase-init.js";
 import { showToast, requireAdmin } from "./auth.js";
 import {
   collection, query, orderBy, onSnapshot, doc, addDoc, updateDoc, deleteDoc,
-  serverTimestamp, increment, getDocs
+  serverTimestamp, increment, getDocs, setDoc, getDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const shell = document.getElementById("adminShell");
@@ -141,6 +141,149 @@ function initAdmin() {
     }
   }
 
+  /* ---------------- MENU MANAGEMENT ---------------- */
+  const menuForm = document.getElementById("menuForm");
+  const menuTableBody = document.querySelector("#menuTable tbody");
+  const menuEditId = document.getElementById("menuEditId");
+  const mFormTitle = document.getElementById("menuFormTitle");
+  const mCancelEdit = document.getElementById("menuCancelEdit");
+  let menuItemsCache = [];
+
+  function renderMenuTable() {
+    if (menuItemsCache.length === 0) {
+      menuTableBody.innerHTML = `<tr><td colspan="4" class="dt-empty">No menu items yet — the homepage is showing its default menu.</td></tr>`;
+      return;
+    }
+    menuTableBody.innerHTML = menuItemsCache.map(item => `
+      <tr>
+        <td>${escapeHtml(item.name)}</td>
+        <td>${escapeHtml(item.desc || "—")}</td>
+        <td>${item.order ?? "—"}</td>
+        <td>
+          <div class="dt-actions">
+            <button class="btn-ghost btn-sm" data-medit="${item.id}">Edit</button>
+            <button class="btn-danger" data-mdel="${item.id}">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `).join("");
+
+    menuTableBody.querySelectorAll("[data-medit]").forEach(btn => {
+      btn.addEventListener("click", () => loadMenuForEdit(btn.dataset.medit));
+    });
+    menuTableBody.querySelectorAll("[data-mdel]").forEach(btn => {
+      btn.addEventListener("click", () => deleteMenuItem(btn.dataset.mdel));
+    });
+  }
+
+  function loadMenuForEdit(id) {
+    const item = menuItemsCache.find(m => m.id === id);
+    if (!item) return;
+    menuEditId.value = id;
+    document.getElementById("menuName").value = item.name || "";
+    document.getElementById("menuDesc").value = item.desc || "";
+    document.getElementById("menuOrder").value = item.order ?? 1;
+    mFormTitle.textContent = "Edit Menu Item";
+    mCancelEdit.style.display = "inline-flex";
+    menuForm.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  mCancelEdit.addEventListener("click", () => {
+    menuForm.reset();
+    menuEditId.value = "";
+    mFormTitle.textContent = "Add New Menu Item";
+    mCancelEdit.style.display = "none";
+  });
+
+  menuForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("menuName").value.trim();
+    const desc = document.getElementById("menuDesc").value.trim();
+    const order = +document.getElementById("menuOrder").value || 1;
+    if (!name) { showToast("Please enter a dish name.", "error"); return; }
+
+    const submitBtn = menuForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    try {
+      if (menuEditId.value) {
+        await updateDoc(doc(db, "menu", menuEditId.value), { name, desc, order });
+        showToast("Menu item updated.", "success");
+      } else {
+        await addDoc(collection(db, "menu"), { name, desc, order, createdAt: serverTimestamp() });
+        showToast("Menu item added.", "success");
+      }
+      menuForm.reset();
+      menuEditId.value = "";
+      mFormTitle.textContent = "Add New Menu Item";
+      mCancelEdit.style.display = "none";
+    } catch (err) {
+      showToast(err.message || "Could not save menu item.", "error");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  async function deleteMenuItem(id) {
+    if (!confirm("Delete this menu item?")) return;
+    try {
+      await deleteDoc(doc(db, "menu", id));
+      showToast("Menu item deleted.", "success");
+    } catch (err) {
+      showToast(err.message || "Could not delete menu item.", "error");
+    }
+  }
+
+  /* ---------------- SITE CONTENT ---------------- */
+  const contentForm = document.getElementById("contentForm");
+  const contentFields = {
+    heroSubtitle: "cHeroSubtitle",
+    aboutPara1: "cAboutPara1",
+    aboutPara2: "cAboutPara2",
+    banquetText: "cBanquetText",
+    address: "cAddress",
+    hours: "cHours",
+    email: "cEmail",
+    phone1: "cPhone1",
+    phone2: "cPhone2",
+    whatsapp: "cWhatsapp"
+  };
+
+  async function loadContentForm() {
+    try {
+      const snap = await getDoc(doc(db, "content", "site"));
+      if (!snap.exists()) return;
+      const data = snap.data();
+      Object.entries(contentFields).forEach(([key, id]) => {
+        const el = document.getElementById(id);
+        if (el && data[key]) el.value = data[key];
+      });
+    } catch (err) {
+      console.warn("Could not load site content for editing:", err.message);
+    }
+  }
+
+  contentForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {};
+    Object.entries(contentFields).forEach(([key, id]) => {
+      payload[key] = document.getElementById(id).value.trim();
+    });
+    const submitBtn = contentForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Saving…";
+    try {
+      await setDoc(doc(db, "content", "site"), payload, { merge: true });
+      showToast("Site content updated — changes are now live.", "success");
+    } catch (err) {
+      showToast(err.message || "Could not save site content.", "error");
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Save Changes";
+    }
+  });
+
+  loadContentForm();
+
   /* ---------------- REVIEW MODERATION ---------------- */
   const reviewsTableBody = document.querySelector("#reviewsTable tbody");
 
@@ -202,6 +345,11 @@ function initAdmin() {
     galleryItems = snap.docs.map(d => ({ id: d.id, ...d.data() }));
     renderGalleryTable();
     renderStats();
+  });
+
+  onSnapshot(query(collection(db, "menu"), orderBy("order", "asc")), (snap) => {
+    menuItemsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderMenuTable();
   });
 
   onSnapshot(query(collection(db, "reviews"), orderBy("createdAt", "desc")), (snap) => {
